@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#E8EEF3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hustle Street">
+<meta name="description" content="A 2–4 player phone board game: buy Adelaide suburbs, pick a career, get married, retire rich.">
+<title>Hustle Street</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+body{margin:0;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+button{-webkit-tap-highlight-color:transparent}
+.roombar{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.code{font-family:var(--f-display);font-weight:800;font-size:30px;letter-spacing:.12em;line-height:1}
+#codeIn{text-transform:uppercase;letter-spacing:.2em;font-weight:700}
+
+/* Layout: one column, square board with a life-spinner in its centre, decisions directly under the board */
+:root{
+  --bg:#E8EEF3; --surface:#FFFFFF; --felt:#D5E2EC; --ink:#15212D; --muted:#5A6978; --line:#B9C7D3;
+  --accent:#F2A900; --accent-ink:#271B00;
+  --gA:#8E5BA8; --gB:#1F9488; --gC:#E06A44; --gD:#3A6EA5; --gE:#B5313B;
+  --t-life:#FCEBBE; --t-money:#D3EFDD; --t-cost:#F8DADA; --t-family:#F5DDEA; --t-career:#DAE4F8; --t-gap:#E5E0F2; --t-reno:#EAE4D6;
+  --good:#1E8A4C; --bad:#C0392B;
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151C; --surface:#18222C; --felt:#121C25; --ink:#E5ECF2; --muted:#91A1B0; --line:#2A3947;
+  --t-life:#3A3013; --t-money:#14301F; --t-cost:#3A1B1D; --t-family:#351A2A; --t-career:#18233B; --t-gap:#241F36; --t-reno:#2C281F;
+  --good:#4CC57F; --bad:#F07467; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0E151C; --surface:#18222C; --felt:#121C25; --ink:#E5ECF2; --muted:#91A1B0; --line:#2A3947;
+  --t-life:#3A3013; --t-money:#14301F; --t-cost:#3A1B1D; --t-family:#351A2A; --t-career:#18233B; --t-gap:#241F36; --t-reno:#2C281F;
+  --good:#4CC57F; --bad:#F07467; color-scheme:dark;}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{max-width:600px;margin:0 auto;padding-block:14px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:800;font-size:28px;letter-spacing:-.02em;margin:0;line-height:1}
+h1 span{color:var(--accent)}
+h2{font-family:var(--f-display);font-weight:800;font-size:19px;margin:0 0 8px;text-wrap:balance}
+.chip{font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:4px 9px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.banner{background:var(--t-cost);border:1px solid var(--line);padding:10px 12px;border-radius:10px;font-size:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.muted{color:var(--muted)}
+.btn{font:700 15px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:11px 14px;border-radius:10px;cursor:pointer;text-align:left}
+.btn:focus-visible,.spin:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn:disabled{opacity:.5;cursor:default}
+.btn small{display:block;font-weight:400;font-size:13px;opacity:.85}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:14px;cursor:pointer;padding:4px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.stack{display:flex;flex-direction:column;gap:8px}
+input,select{font:16px var(--f-body);padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-width:0}
+input{flex:1}
+/* board */
+.board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);aspect-ratio:1;width:100%;max-width:100%;gap:2px;background:var(--line);border:2px solid var(--line);border-radius:12px;overflow:hidden}
+.tile{background:var(--surface);position:relative;display:flex;flex-direction:column;overflow:hidden;font-size:clamp(7px,1.85vw,10.5px);line-height:1.05;cursor:pointer;min-width:0}
+.tile.k-life{background:var(--t-life)} .tile.k-payday,.tile.k-hustle,.tile.k-promo{background:var(--t-money)}
+.tile.k-tax,.tile.k-holiday{background:var(--t-cost)} .tile.k-wedding,.tile.k-baby{background:var(--t-family)}
+.tile.k-uni,.tile.k-jobfair{background:var(--t-career)} .tile.k-gap{background:var(--t-gap)} .tile.k-reno{background:var(--t-reno)}
+.tile .strip{height:20%;flex:none}
+.tile .tn{padding:2px 2px 0;font-weight:700;overflow-wrap:anywhere}
+.tile.corner .tn{font-family:var(--f-display);font-weight:800;font-size:1.15em}
+.tile .tp{margin-top:auto;padding:0 2px 2px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tile .own{position:absolute;inset:0;pointer-events:none;border:3px solid transparent}
+.tile .reno{position:absolute;top:1px;right:2px;font-weight:800;color:#fff;font-size:.9em}
+.toks{position:absolute;left:2px;bottom:2px;display:flex;gap:1px;flex-wrap:wrap}
+.tok{width:clamp(9px,2.5vw,13px);aspect-ratio:1;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--ink)}
+.tok.now{animation:bob 1s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-2px)}}
+.center{grid-row:2/8;grid-column:2/8;background:var(--felt);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px;text-align:center;min-width:0}
+.whose{font-family:var(--f-display);font-weight:800;font-size:clamp(15px,4.4vw,22px);line-height:1.1}
+.sub{font-size:clamp(11px,3vw,13px);color:var(--muted)}
+.spin{width:clamp(90px,28vw,150px);aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;position:relative;padding:0;
+  background:conic-gradient(var(--gA) 0 36deg,var(--gB) 0 72deg,var(--gC) 0 108deg,var(--gD) 0 144deg,var(--gE) 0 180deg,var(--gA) 0 216deg,var(--gB) 0 252deg,var(--gC) 0 288deg,var(--gD) 0 324deg,var(--gE) 0 360deg);
+  box-shadow:0 0 0 4px var(--surface),0 4px 14px rgba(0,0,0,.18)}
+.spin span{position:absolute;inset:22%;border-radius:50%;background:var(--surface);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:800;font-size:clamp(22px,7vw,38px);line-height:1}
+.spin span em{font-style:normal;font-family:var(--f-body);font-size:clamp(9px,2.4vw,11px);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.spin:disabled{cursor:default;filter:saturate(.35)}
+.spin.go{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 4px var(--surface),0 0 0 10px color-mix(in srgb,var(--accent) 45%,transparent)}}
+.event{font-size:clamp(11px,3vw,13.5px);max-width:95%;min-height:2.6em}
+.boardwrap{position:relative}
+.floats{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:12px}
+.float{position:absolute;bottom:12%;display:flex;flex-direction:column;align-items:center;animation:rise 2.4s ease-out forwards}
+.float .em{font-size:clamp(34px,10vw,52px);line-height:1}
+.float .who{font-size:11px;font-weight:700;color:#fff;padding:1px 7px;border-radius:99px;margin-top:2px}
+@keyframes rise{0%{transform:translateY(20px) scale(.6);opacity:0}15%{transform:translateY(0) scale(1.1);opacity:1}100%{transform:translateY(-55vw) scale(1);opacity:0}}
+.reacts{display:flex;justify-content:space-between;gap:6px}
+.reacts button{flex:1;font-size:24px;line-height:1;padding:8px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+.reacts button:active{transform:scale(.92)}
+.reacts button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.trade-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.trade-cols>div{min-width:0;display:flex;flex-direction:column;gap:6px}
+.trade-cols h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0}
+.ck{display:flex;align-items:center;gap:6px;font-size:14px;overflow-wrap:anywhere}
+.ck input{flex:none;width:18px;height:18px;accent-color:var(--accent)}
+.offer{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:14px}
+.offer dt{color:var(--muted)} .offer dd{margin:0;font-weight:700}
+@media (prefers-reduced-motion: reduce){.float{animation:none;opacity:1;top:40%;bottom:auto}}
+/* players */
+.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px}
+.pc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;border-left-width:6px;min-width:0}
+.pc.turn{box-shadow:0 0 0 2px var(--accent)}
+.pc .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pc .nm{font-family:var(--f-display);font-weight:800;font-size:18px;overflow-wrap:anywhere}
+.cash{font-variant-numeric:tabular-nums;font-weight:700;font-size:18px}
+.cash.neg{color:var(--bad)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-size:12px;color:var(--muted)}
+.stats b{display:block;color:var(--ink);font-size:14px;font-variant-numeric:tabular-nums}
+.props{display:flex;flex-wrap:wrap;gap:4px}
+.pp{font-size:11.5px;color:#fff;padding:2px 7px;border-radius:99px;font-weight:700}
+.tag{font-size:11px;text-transform:uppercase;letter-spacing:.06em;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:1px 7px;color:var(--muted)}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px;max-height:260px;overflow:auto}
+.log li{display:flex;gap:8px;align-items:baseline}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;transform:translateY(1px)}
+.seat{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.seat:last-child{border-bottom:0}
+.seat .nm{font-weight:700;flex:1;overflow-wrap:anywhere}
+details summary{cursor:pointer;font-family:var(--f-display);font-weight:800;font-size:17px}
+details ul{padding-left:18px;margin:8px 0 0;display:flex;flex-direction:column;gap:5px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{text-align:right;padding:7px 4px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+.tblwrap{overflow-x:auto}
+.winner{font-family:var(--f-display);font-weight:800;font-size:26px;line-height:1.1;text-wrap:balance}
+@media (prefers-reduced-motion: reduce){.tok.now,.spin.go{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Hustle <span>Street</span></h1>
+    <span class="chip" id="modeChip">Loading…</span>
+  </header>
+  <div class="banner" id="banner" role="status" hidden></div>
+  <div class="panel roombar" id="roomBar" hidden><div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em">Room code</div><div class="code" id="roomCode"></div></div><button class="btn primary" id="inviteBtn">Invite</button></div>
+
+  <section id="home" class="stack" hidden>
+    <div class="panel stack">
+      <h2>Host a game</h2>
+      <p class="muted" style="margin:0">Your phone runs the game. Share the room code and your mates join from their browser, no app needed. Playing on one phone? Host, then add everyone's names.</p>
+      <button class="btn primary" id="hostBtn" style="text-align:center">Host a new game</button>
+      <button class="btn" id="resumeBtn" hidden></button>
+    </div>
+    <div class="panel stack">
+      <h2>Join a game</h2>
+      <div class="row"><input id="codeIn" maxlength="4" placeholder="Room code" autocapitalize="characters" autocomplete="off" aria-label="Room code"><button class="btn primary" id="joinCodeBtn">Join</button></div>
+    </div>
+  </section>
+
+  <section id="lobby" class="stack" hidden>
+    <div class="panel stack">
+      <h2>Who's playing?</h2>
+      <p class="muted" id="lobbyHint" style="margin:0"></p>
+      <div id="seats"></div>
+      <div class="row" id="joinRow">
+        <input id="name" maxlength="14" placeholder="Your name" autocomplete="off">
+        <button class="btn primary" id="joinBtn">Join</button>
+      </div>
+      <label class="row" style="align-items:center" for="laps"><span class="muted">Game length</span>
+        <select id="laps">
+          <option value="2">Short · 2 laps (~20 min)</option>
+          <option value="3">Standard · 3 laps (~35 min)</option>
+          <option value="4">Long · 4 laps (~50 min)</option>
+        </select>
+      </label>
+      <button class="btn primary" id="startBtn" style="text-align:center">Start game</button>
+    </div>
+  </section>
+
+  <section id="game" class="stack" hidden>
+    <div class="boardwrap"><div class="board" id="board"></div><div class="floats" id="floats" aria-live="polite"></div></div>
+    <div class="reacts" id="reacts" role="group" aria-label="Send a reaction"></div>
+    <div class="panel stack" id="decision"></div>
+    <div class="panel stack" id="tradeBox" hidden></div>
+    <div class="players" id="players"></div>
+    <div class="panel"><h2>What happened</h2><ul class="log" id="log"></ul></div>
+  </section>
+
+  <section id="over" class="stack" hidden></section>
+
+  <details class="panel" id="rules">
+    <summary>How to play</summary>
+    <ul>
+      <li>Spin 1–10 and move clockwise. First turn, choose: pay $40k for uni (better-paid jobs) or start working straight away.</li>
+      <li><b>Payday</b>: every time you pass it you collect your salary, minus $3k per kid. Negative cash costs 10% interest.</li>
+      <li><b>Playing</b>: one person taps Host and shares the room code. Everyone else opens the link and joins. Keep the host’s screen on: if the host closes the page the game pauses until they reopen it (it’s saved on their phone).</li>
+      <li><b>Suburbs</b>: buy them when you land on an empty one. Others pay you rent. Own both suburbs of a colour and rent doubles. <b>Reno</b> tiles let you renovate one of yours: rent doubles again and it's worth 1.5× at the end.</li>
+      <li><b>Life</b> tiles draw a random event. Wedding, Baby, Holiday and Gap Year earn joy points. Job Fair lets you switch careers; Uni gets you a degree.</li>
+      <li><b>Bank of Mum and Dad</b>: on your turn, borrow $50k. Until you pay it back you lose 2 joy every Payday; paying it back earns 3 joy. Anything still owed comes off your final score.</li>
+      <li><b>Joy</b> points come from weddings, babies, holidays, gap years and good life cards. Each one is worth $5k at the end.</li>
+      <li>After your final lap you retire (first retiree gets $30k, second $15k, third $5k). Retired players still collect rent.</li>
+      <li>When everyone's retired: cash + property value + $5k per joy point. Highest net worth wins.</li>
+    </ul>
+  </details>
+  <div class="row" id="footer" style="justify-content:space-between">
+    <button class="linkbtn" id="leaveRoom" hidden>Leave room</button>
+    <button class="linkbtn" id="resetBtn">New game</button>
+  </div>
+</div>
+<script src="peerjs.min.js"></script>
+<script>
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=k=>(k<0?'−':'')+'$'+Math.abs(Math.round(k))+'k';
+const rnd=n=>Math.floor(Math.random()*n);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const PCOL=['#F2A900','#E0457B','#2FA866','#4F86EA'];
+const GCOL={A:'var(--gA)',B:'var(--gB)',C:'var(--gC)',D:'var(--gD)',E:'var(--gE)'};
+const T=[
+ {k:'payday',n:'PAYDAY',d:'Collect your salary each time you pass.'},
+ {k:'prop',n:'Elizabeth',g:'A',p:60,r:8},
+ {k:'life',n:'LIFE',d:'Draw a random life event.'},
+ {k:'prop',n:'Salisbury',g:'A',p:70,r:10},
+ {k:'tax',n:'TAX',d:'Pay 10% of your cash.'},
+ {k:'uni',n:'UNI',d:'Pay $40k for a degree and pick a degree job.'},
+ {k:'prop',n:'Port Adl',full:'Port Adelaide',g:'B',p:100,r:13},
+ {k:'jobfair',n:'JOB FAIR',d:'Switch to one of two new jobs, or keep yours.',c:1},
+ {k:'prop',n:'Woodville',g:'B',p:110,r:15},
+ {k:'hustle',n:'SIDE HUSTLE',d:'Spin again and earn $3k per point.'},
+ {k:'baby',n:'BABY',d:'Partnered: +1 kid, +5 joy. Kids cost $3k each payday.'},
+ {k:'life',n:'LIFE',d:'Draw a random life event.'},
+ {k:'prop',n:'Glenelg',g:'C',p:150,r:20},
+ {k:'reno',n:'RENO',d:'Renovate one of your suburbs for half its price.'},
+ {k:'wedding',n:'WEDDING',d:'+10 joy and $5k gifts from everyone.',c:1},
+ {k:'prop',n:'Henley',full:'Henley Beach',g:'C',p:160,r:22},
+ {k:'life',n:'LIFE',d:'Draw a random life event.'},
+ {k:'promo',n:'PROMO',d:'+$6k salary.'},
+ {k:'prop',n:'Norwood',g:'D',p:200,r:27},
+ {k:'holiday',n:'HOLIDAY',d:'Pay $12k, +6 joy.'},
+ {k:'prop',n:'Unley',g:'D',p:210,r:29},
+ {k:'gap',n:'GAP YEAR',d:'+4 joy, miss your next turn.',c:1},
+ {k:'prop',n:'Burnside',g:'E',p:260,r:35},
+ {k:'hustle',n:'SIDE HUSTLE',d:'Spin again and earn $3k per point.'},
+ {k:'baby',n:'BABY',d:'Partnered: +1 kid, +5 joy. Kids cost $3k each payday.'},
+ {k:'prop',n:'Springfld',full:'Springfield',g:'E',p:300,r:42},
+ {k:'life',n:'LIFE',d:'Draw a random life event.'},
+ {k:'reno',n:'RENO',d:'Renovate one of your suburbs for half its price.'},
+];
+T[0].c=1; T.forEach((t,i)=>{t.i=i; t.full=t.full||t.n});
+const JOBS=[{n:'Barista',s:18,d:0},{n:'Hairdresser',s:22,d:0},{n:'Retail manager',s:26,d:0},{n:'Truck driver',s:30,d:0},{n:'Sparky',s:34,d:0},
+ {n:'Teacher',s:38,d:1},{n:'Nurse',s:40,d:1},{n:'Accountant',s:46,d:1},{n:'Engineer',s:52,d:1},{n:'Lawyer',s:60,d:1},{n:'Doctor',s:68,d:1}];
+function pos2cell(i){ if(i<=7) return [8,8-i]; if(i<=14) return [8-(i-7),1]; if(i<=21) return [1,1+(i-14)]; return [1+(i-21),8]; }
+
+/* ---------- state helpers ---------- */
+const fresh=()=>({phase:'lobby',players:[],turn:0,laps:3,owned:{},log:[],pending:null,trade:null,lastSpin:null,rev:0});
+function newPlayer(s,name,uid){const used=s.players.map(p=>p.color);let c=0;while(used.includes(c))c++;
+ return {name,uid:uid||null,color:c,pos:0,cash:150,career:null,salary:0,degree:false,happy:0,kids:0,partner:false,laps:0,retired:false,skip:false,loan:0};}
+function log(s,i,t){s.log.unshift({t,c:i==null?null:s.players[i].color});s.log=s.log.slice(0,40);}
+const owes=p=>p.loan||0;
+const ownedBy=(s,i)=>Object.keys(s.owned).filter(k=>s.owned[k].owner===i).map(Number);
+function rentOf(s,idx){const t=T[idx],o=s.owned[idx];const set=T.filter(x=>x.g===t.g).every(x=>s.owned[x.i]&&s.owned[x.i].owner===o.owner);return t.r*(set?2:1)*(o.reno?2:1);}
+function worth(s,i){const p=s.players[i];let prop=0;ownedBy(s,i).forEach(k=>{prop+=T[k].p*(s.owned[k].reno?1.5:1)});return {cash:p.cash,prop:Math.round(prop),joy:p.happy*5,owed:owes(p),total:Math.round(p.cash+prop+p.happy*5-owes(p))};}
+function pick2(list,exclude){const pool=list.filter(j=>j.n!==exclude);const a=pool.splice(rnd(pool.length),1)[0];const b=pool.splice(rnd(pool.length),1)[0];return [a,b].filter(Boolean).map(j=>j.n);}
+
+const CARDS=[
+ (s,i,p)=>{p.cash+=10;return 'Tax refund came through. +$10k'},
+ (s,i,p)=>{p.cash-=8;return 'New tyres for the ute. −$8k'},
+ (s,i,p)=>{p.happy+=2;return 'Won the meat tray at the pub. +2 joy'},
+ (s,i,p)=>{const w=Math.random()<.5;p.cash+=w?30:-20;return w?'Crypto punt paid off. +$30k':'Crypto punt went to zero. −$20k'},
+ (s,i,p)=>{p.cash+=12;return 'Won the office footy tipping. +$12k'},
+ (s,i,p)=>{p.cash-=5;return 'Speed camera on South Road. −$5k'},
+ (s,i,p)=>{p.cash+=40;return 'Inheritance from a great-aunt. +$40k'},
+ (s,i,p)=>{let c=0;for(const k in s.owned){s.players[s.owned[k].owner].cash+=5;c++}return c?'Property boom: every landlord collects $5k per suburb':'Property boom, but nobody owns a suburb yet'},
+ (s,i,p)=>{const c=ownedBy(s,i).length;p.cash-=3*c;return c?`Interest rates rise. −$${3*c}k across your ${c} suburb${c>1?'s':''}`:'Interest rates rise. Good thing you rent'},
+ (s,i,p)=>{p.cash-=4;p.happy+=6;return 'Adopted a rescue dog. −$4k, +6 joy'},
+ (s,i,p)=>{p.happy+=4;return 'Finished the City-Bay fun run. +4 joy'},
+ (s,i,p)=>{p.cash-=2;return 'Cracked your phone screen. −$2k'},
+ (s,i,p)=>{const b=Math.round(p.salary/2);p.cash+=b;return b?`Bonus at work. +${fmt(b)}`:'No job, no bonus'},
+ (s,i,p)=>{let t=0;s.players.forEach((q,j)=>{if(j!==i){q.cash-=5;t+=5}});p.cash+=t;return 'Birthday! Everyone chips in $5k'},
+ (s,i,p)=>{p.happy+=5;return 'Volunteered at the footy club. +5 joy'},
+ (s,i,p)=>{p.cash-=10;return 'Hot water system burst. −$10k'},
+];
+
+/* ---------- game rules ---------- */
+function payday(s,i){const p=s.players[i];p.laps++;const pay=p.salary-p.kids*3;p.cash+=pay;
+ let t=`${p.name} hit Payday: ${fmt(pay)}`; if(p.cash<0){const int=Math.round(-p.cash*0.1);p.cash-=int;t+=`, ${fmt(int)} interest on debt`;}
+ log(s,i,t);
+ if(owes(p)){p.happy-=2;log(s,i,`Mum asked ${p.name} about the loan again. −2 joy`);}
+ if(p.laps>=s.laps){p.retired=true;p.pos=0;const order=s.players.filter(x=>x.retired).length;const b=[30,15,5][order-1]||0;p.cash+=b;log(s,i,`${p.name} retires${b?` with a ${fmt(b)} bonus`:''}`);}
+}
+function doSpin(s,n){const i=s.turn,p=s.players[i];s.lastSpin=n;log(s,i,`${p.name} spun ${n}`);
+ for(let k=0;k<n;k++){p.pos=(p.pos+1)%28;if(p.pos===0){payday(s,i);if(p.retired){endTurn(s);return;}}}
+ land(s,i);}
+function land(s,i){const p=s.players[i],t=T[p.pos];
+ switch(t.k){
+  case 'payday':break;
+  case 'prop':{const o=s.owned[p.pos];
+    if(!o){ if(p.cash>=t.p){s.pending={type:'buy',tile:p.pos};return;} log(s,i,`${p.name} can't afford ${t.full} (${fmt(t.p)})`);break;}
+    if(o.owner===i){log(s,i,`${p.name} drops by their place in ${t.full}`);break;}
+    const amt=rentOf(s,p.pos);p.cash-=amt;s.players[o.owner].cash+=amt;log(s,i,`${p.name} paid ${fmt(amt)} rent to ${s.players[o.owner].name} in ${t.full}`);break;}
+  case 'life':{const txt=CARDS[rnd(CARDS.length)](s,i,p);log(s,i,`${p.name}: ${txt}`);break;}
+  case 'tax':{const a=Math.max(0,Math.round(p.cash*0.1));p.cash-=a;log(s,i,`${p.name} paid ${fmt(a)} tax`);break;}
+  case 'uni': if(!p.degree){ if(p.cash>=40){s.pending={type:'study'};return;} log(s,i,`${p.name} can't afford uni right now`);} else {p.cash+=5;log(s,i,`${p.name} gave a guest lecture. +$5k`);} break;
+  case 'jobfair': s.pending={type:'job',options:pick2(JOBS.filter(j=>p.degree||!j.d),p.career),after:'end'};return;
+  case 'hustle':{const n=1+rnd(10),a=n*3;p.cash+=a;log(s,i,`${p.name}'s side hustle spun ${n}: +${fmt(a)}`);break;}
+  case 'baby': if(p.partner){p.kids++;p.happy+=5;log(s,i,`${p.name} had a baby! +5 joy (kid #${p.kids})`);} else {p.happy+=2;log(s,i,`${p.name} babysat for a friend. +2 joy`);} break;
+  case 'wedding': if(!p.partner){p.partner=true;p.happy+=10;let g=0;s.players.forEach((q,j)=>{if(j!==i){q.cash-=5;g+=5}});p.cash+=g;log(s,i,`${p.name} got married! +10 joy, +${fmt(g)} in gifts`);} else {p.happy+=3;p.cash-=5;log(s,i,`${p.name}'s anniversary dinner. −$5k, +3 joy`);} break;
+  case 'promo': if(p.career){p.salary+=6;log(s,i,`${p.name} got promoted. Salary now ${fmt(p.salary)}`);} else {p.cash+=5;log(s,i,`${p.name} picked up a cash job. +$5k`);} break;
+  case 'holiday': p.cash-=12;p.happy+=6;log(s,i,`${p.name} went to Kangaroo Island. −$12k, +6 joy`);break;
+  case 'gap': p.skip=true;p.happy+=4;log(s,i,`${p.name} takes a gap year. +4 joy, misses next turn`);break;
+  case 'reno':{const opts=ownedBy(s,i).filter(k=>!s.owned[k].reno&&p.cash>=T[k].p/2);if(opts.length){s.pending={type:'reno',options:opts};return;} log(s,i,`${p.name} has nothing to renovate`);break;}
+ }
+ endTurn(s);}
+function endTurn(s){s.pending=null;s.trade=null;const n=s.players.length;
+ if(s.players.every(p=>p.retired)){s.phase='over';log(s,null,'Everyone has retired. Game over!');return;}
+ let idx=s.turn;
+ for(let guard=0;guard<n*3;guard++){idx=(idx+1)%n;const p=s.players[idx];if(p.retired)continue;
+  if(p.skip){p.skip=false;log(s,idx,`${p.name} is on their gap year and skips a turn`);continue;}
+  s.turn=idx;if(!p.career)s.pending={type:'path'};return;}
+}
+function listNames(ks,cash){const parts=ks.map(k=>T[k].full);if(cash>0)parts.push(fmt(cash));return parts.length?parts.join(', '):'nothing';}
+function tradeLine(s,t){return `${s.players[t.from].name} gives ${listNames(t.give,t.giveCash)}, ${s.players[t.to].name} gives ${listNames(t.get,t.getCash)}`;}
+const A={
+ join:(s,name,uid)=>{s.players.push(newPlayer(s,name,uid))},
+ leave:(s,i)=>{s.players.splice(i,1)},
+ laps:(s,v)=>{s.laps=v},
+ start:(s)=>{s.phase='play';s.turn=0;s.pending={type:'path'};s.log=[];log(s,null,`Game on: ${s.players.length} players, ${s.laps} laps`);},
+ spin:doSpin,
+ path:(s,ch)=>{const p=s.players[s.turn];if(ch==='uni'){p.cash-=40;p.degree=true;log(s,s.turn,`${p.name} heads to uni. −$40k`);s.pending={type:'job',options:pick2(JOBS.filter(j=>j.d)),after:'spin'};}
+  else{log(s,s.turn,`${p.name} skips uni and starts working`);s.pending={type:'job',options:pick2(JOBS.filter(j=>!j.d)),after:'spin'};}},
+ job:(s,name)=>{const p=s.players[s.turn],after=s.pending.after;
+  if(name){const j=JOBS.find(x=>x.n===name);p.career=j.n;p.salary=j.s;log(s,s.turn,`${p.name} is now a ${j.n.toLowerCase()} on ${fmt(j.s)} a lap`);}
+  else log(s,s.turn,`${p.name} keeps their job`);
+  if(after==='spin')s.pending=null;else endTurn(s);},
+ buy:(s,yes)=>{const i=s.turn,p=s.players[i],t=T[s.pending.tile];
+  if(yes){p.cash-=t.p;s.owned[t.i]={owner:i,reno:false};log(s,i,`${p.name} bought ${t.full} for ${fmt(t.p)}`);} else log(s,i,`${p.name} passed on ${t.full}`);
+  endTurn(s);},
+ study:(s,yes)=>{const p=s.players[s.turn];if(yes){p.cash-=40;p.degree=true;log(s,s.turn,`${p.name} went back to uni. −$40k`);s.pending={type:'job',options:pick2(JOBS.filter(j=>j.d),p.career),after:'end'};}else{log(s,s.turn,`${p.name} skipped uni`);endTurn(s);}},
+ reno:(s,k)=>{const i=s.turn,p=s.players[i];if(k!=null){const t=T[k];p.cash-=t.p/2;s.owned[k].reno=true;log(s,i,`${p.name} renovated ${t.full}. −${fmt(t.p/2)}, rent doubled`);}else log(s,i,`${p.name} skipped the reno`);endTurn(s);},
+ borrow:(s)=>{const p=s.players[s.turn];if(owes(p)||s.pending||s.trade)return;p.loan=50;p.cash+=50;log(s,s.turn,`${p.name} borrowed $50k from the Bank of Mum and Dad`);},
+ repay:(s)=>{const p=s.players[s.turn];if(!owes(p)||p.cash<50)return;p.cash-=50;p.loan=0;p.happy+=3;log(s,s.turn,`${p.name} paid Mum and Dad back. They're proud. +3 joy`);},
+ propose:(s,t)=>{if(s.pending||s.trade)return;s.trade=t;const a=s.players[t.from],b=s.players[t.to];log(s,t.from,`${a.name} offered ${b.name} a trade`);},
+ tradeCancel:(s)=>{const t=s.trade;if(!t)return;s.trade=null;log(s,t.from,`${s.players[t.from].name} withdrew their offer`);},
+ tradeAnswer:(s,yes)=>{const t=s.trade;if(!t)return;s.trade=null;const a=s.players[t.from],b=s.players[t.to];
+  if(!yes){log(s,t.to,`${b.name} turned down ${a.name}'s offer`);return;}
+  const ok=t.give.every(k=>s.owned[k]&&s.owned[k].owner===t.from)&&t.get.every(k=>s.owned[k]&&s.owned[k].owner===t.to)&&a.cash>=t.giveCash&&b.cash>=t.getCash;
+  if(!ok){log(s,t.to,`That trade no longer adds up, so it was cancelled`);return;}
+  t.give.forEach(k=>s.owned[k].owner=t.to);t.get.forEach(k=>s.owned[k].owner=t.from);
+  a.cash+=t.getCash-t.giveCash;b.cash+=t.giveCash-t.getCash;
+  log(s,t.to,`${b.name} accepted: ${tradeLine(s,t)}`);},
+ reset:(s)=>{Object.assign(s,fresh(),{laps:s.laps,players:s.players.map(p=>newPlayer({players:[]},p.name,p.uid)).map((p,ix)=>Object.assign(p,{color:s.players[ix].color}))});},
+};
+
+/* ---------- connection: the host's phone runs the game, guests connect peer-to-peer ---------- */
+const EMO=['😂','🔥','😭','💸','👏','😤'];
+const PREFIX='hustlestreet-adl-';
+const ALPHA='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+let mode='home',S=fresh(),peer=null,conns=[],hostConn=null,code=null,gotState=false,busy=false,busyTimer=null,anim=null,info=null,resetArm=false,lastReact=0,wake=null;
+const ME=(()=>{const mk=()=>Math.random().toString(36).slice(2,12);try{let id=localStorage.getItem('hs-id');if(!id){id=mk();localStorage.setItem('hs-id',id);}return id;}catch(e){return mk();}})();
+const cur=()=>S;
+const isMine=p=>!!p&&p.uid===ME;
+const multi=()=>S.players.filter(isMine).length>1;
+function banner(t){const b=$('banner');b.hidden=!t;b.textContent=t||'';}
+function saveHost(){try{localStorage.setItem('hs-host',JSON.stringify({code,s:S}));}catch(e){}}
+function loadHost(){try{return JSON.parse(localStorage.getItem('hs-host')||'null');}catch(e){return null;}}
+function setHash(c){try{history.replaceState(null,'',c?'#'+c:location.pathname);}catch(e){}}
+const newCode=()=>Array.from({length:4},()=>ALPHA[rnd(ALPHA.length)]).join('');
+const isInt=(v,lo,hi)=>Number.isInteger(v)&&v>=lo&&v<=hi;
+
+/* host decides who may do what */
+function allowed(s,from,name,args){const tp=s.players[s.turn];const seated=s.players.some(p=>p.uid===from);
+ switch(name){
+  case 'join':return s.phase==='lobby'&&s.players.length<4&&typeof args[0]==='string'&&args[0].trim().length>0;
+  case 'leave':return s.phase==='lobby'&&isInt(args[0],0,3)&&!!s.players[args[0]]&&s.players[args[0]].uid===from;
+  case 'laps':return s.phase==='lobby'&&seated&&[2,3,4].includes(args[0]);
+  case 'start':return s.phase==='lobby'&&seated&&s.players.length>=2;
+  case 'reset':return seated||from===ME;
+  case 'tradeAnswer':return s.phase==='play'&&!!s.trade&&s.players[s.trade.to].uid===from;
+  case 'tradeCancel':return s.phase==='play'&&!!s.trade&&s.players[s.trade.from].uid===from;
+  case 'spin':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade&&isInt(args[0],1,10);
+  case 'propose':{const t=args[0];if(!(s.phase==='play'&&tp&&tp.uid===from&&t&&typeof t==='object'))return false;
+   const n=s.players.length;return t.from===s.turn&&isInt(t.to,0,n-1)&&t.to!==t.from&&Array.isArray(t.give)&&Array.isArray(t.get)&&t.give.every(k=>isInt(k,0,27))&&t.get.every(k=>isInt(k,0,27))&&isInt(t.giveCash,0,1e6)&&isInt(t.getCash,0,1e6);}
+  case 'path':case 'job':case 'buy':case 'study':case 'reno':return s.phase==='play'&&tp&&tp.uid===from&&!!s.pending&&s.pending.type===name;
+  case 'borrow':case 'repay':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade;
+ }return false;}
+function apply(name,args,from){if(!A[name]||!allowed(S,from,name,args))return false;
+ if(name==='join')args=[String(args[0]).trim().slice(0,14),from];
+ if(name==='job'&&args[0]!=null&&!(S.pending.options||[]).includes(args[0]))return false;
+ if(name==='reno'&&args[0]!=null&&!(S.pending.options||[]).includes(args[0]))return false;
+ const s=structuredClone(S);A[name](s,...args);s.rev=(s.rev||0)+1;S=s;saveHost();broadcast();render();return true;}
+function broadcast(){conns.forEach(c=>{if(c.open)try{c.send({type:'state',s:S});}catch(e){}});}
+function act(name,...args){if(busy)return;
+ if(mode==='host'){apply(name,args,ME);return;}
+ if(mode!=='guest')return;
+ if(!hostConn||!hostConn.open){banner('Not connected to the host right now. Trying again…');return;}
+ busy=true;render();hostConn.send({type:'act',name,args});
+ clearTimeout(busyTimer);busyTimer=setTimeout(()=>{if(busy){busy=false;banner('That move didn’t reach the host. Try again.');render();}},6000);}
+const canAct=()=>{const s=S;if(mode==='home'||s.phase!=='play'||busy||anim)return false;return isMine(s.players[s.turn]);};
+const canAnswer=()=>{const s=S;if(!s.trade||s.phase!=='play'||busy)return false;return isMine(s.players[s.trade.to]);};
+const canPropose=()=>{const s=S;return canAct()&&!s.pending&&!s.trade&&s.players.length>1;};
+
+function peerOpts(){return {debug:0};}
+function hostRoom(c,saved,tries=0){if(peer)try{peer.destroy();}catch(e){}
+ code=c;S=saved||fresh();mode='host';gotState=true;conns=[];setHash(code);saveHost();render();
+ peer=new Peer(PREFIX+code,peerOpts());
+ peer.on('open',()=>{banner('');render();});
+ peer.on('connection',conn=>{conns.push(conn);
+  conn.on('open',()=>{try{conn.send({type:'state',s:S});}catch(e){}render();});
+  conn.on('data',d=>onHostData(conn,d));
+  const gone=()=>{conns=conns.filter(x=>x!==conn);render();};conn.on('close',gone);conn.on('error',gone);});
+ peer.on('disconnected',()=>{if(mode==='host')setTimeout(()=>{try{if(peer&&!peer.destroyed)peer.reconnect();}catch(e){}},2000);});
+ peer.on('error',err=>{
+  if(err.type==='unavailable-id'){ if(saved&&tries<6){banner('Reopening your room…');setTimeout(()=>hostRoom(c,saved,tries+1),3000);}
+   else if(!saved){hostRoom(newCode(),null);} else banner(`Room ${c} is already open somewhere else. Close it there, or start a new game.`);return;}
+  if(['network','server-error','socket-error','socket-closed'].includes(err.type))banner('Can’t reach the matchmaking server. Check your internet; it will retry.');
+ });}
+function onHostData(conn,d){if(!d||typeof d!=='object')return;const from=conn.metadata&&typeof conn.metadata.id==='string'?conn.metadata.id:null;if(!from)return;
+ if(d.type==='act'&&typeof d.name==='string'){if(!apply(d.name,Array.isArray(d.args)?d.args:[],from)){try{conn.send({type:'state',s:S});}catch(e){}}}
+ else if(d.type==='react'&&isInt(d.e,0,EMO.length-1)){showReact(d.e,from);conns.forEach(c=>{if(c!==conn&&c.open)try{c.send({type:'react',e:d.e,from});}catch(e){}});}}
+function joinRoom(c){if(peer)try{peer.destroy();}catch(e){}
+ code=c;mode='guest';S=fresh();gotState=false;setHash(code);render();
+ peer=new Peer(peerOpts());
+ peer.on('open',connectHost);
+ peer.on('disconnected',()=>{if(mode==='guest')setTimeout(()=>{try{if(peer&&!peer.destroyed)peer.reconnect();}catch(e){}},2000);});
+ peer.on('error',err=>{
+  if(err.type==='peer-unavailable'){banner(gotState?'The host’s phone has gone quiet. Waiting for it to come back…':`No game open with code ${code}. Check the code, or ask the host to open the game.`);setTimeout(()=>{if(mode==='guest'&&code===c&&(!hostConn||!hostConn.open))connectHost();},4000);return;}
+  if(['network','server-error','socket-error','socket-closed'].includes(err.type))banner('Can’t reach the matchmaking server. Check your internet; it will retry.');});}
+function connectHost(){if(mode!=='guest'||!peer||peer.destroyed)return;
+ const c=peer.connect(PREFIX+code,{reliable:true,metadata:{id:ME}});hostConn=c;
+ c.on('open',()=>{banner('');});
+ c.on('data',d=>{if(!d||typeof d!=='object')return;
+  if(d.type==='state'&&d.s&&Array.isArray(d.s.players)){S=d.s;gotState=true;busy=false;clearTimeout(busyTimer);render();}
+  else if(d.type==='react'&&isInt(d.e,0,EMO.length-1))showReact(d.e,d.from);});
+ c.on('close',()=>{if(mode==='guest'&&hostConn===c){banner('Lost the host. Reconnecting…');setTimeout(connectHost,3000);}});}
+function leaveRoom(){try{peer&&peer.destroy();}catch(e){}peer=null;conns=[];hostConn=null;mode='home';code=null;S=fresh();gotState=false;busy=false;setHash('');banner('');closeTrade();render();}
+async function keepAwake(){try{if(navigator.wakeLock&&!wake&&document.visibilityState==='visible'){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null;});}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){keepAwake();if(peer&&peer.disconnected&&!peer.destroyed)try{peer.reconnect();}catch(e){}if(mode==='guest'&&(!hostConn||!hostConn.open))connectHost();}});
+document.addEventListener('click',keepAwake,{passive:true});
+
+/* ---------- trade builder (local UI only, not shared until sent) ---------- */
+let tradeOpen=false,tradeTo=null;
+function openTrade(){const s=cur();if(!canPropose())return;tradeOpen=true;
+ if(tradeTo==null||tradeTo===s.turn||!s.players[tradeTo])tradeTo=s.players.findIndex((p,i)=>i!==s.turn);buildTrade();}
+function closeTrade(){tradeOpen=false;$('tradeBox').hidden=true;$('tradeBox').innerHTML='';}
+function buildTrade(){const s=cur(),me=s.turn,them=tradeTo,a=s.players[me],b=s.players[them];
+ const box=(ks,pre)=>ks.length?ks.map(k=>`<label class="ck" for="${pre}${k}"><input type="checkbox" id="${pre}${k}" data-k="${k}"><span class="dot" style="background:${GCOL[T[k].g]}"></span>${esc(T[k].full)}${s.owned[k].reno?' ★':''}</label>`).join(''):'<span class="muted" style="font-size:13px">No suburbs</span>';
+ $('tradeBox').innerHTML=`<h2>Propose a trade</h2>
+  <label class="row" style="align-items:center" for="tr-to"><span class="muted">Trade with</span>
+   <select id="tr-to">${s.players.map((p,i)=>i===me?'':`<option value="${i}"${i===them?' selected':''}>${esc(p.name)}</option>`).join('')}</select></label>
+  <div class="trade-cols">
+   <div><h3>You give</h3>${box(ownedBy(s,me),'tr-g-')}<label class="muted" for="tr-gc" style="font-size:13px">Cash ($k, you have ${fmt(a.cash)})</label><input id="tr-gc" type="number" inputmode="numeric" min="0" step="5" value="0"></div>
+   <div><h3>${esc(b.name)} gives</h3>${box(ownedBy(s,them),'tr-w-')}<label class="muted" for="tr-wc" style="font-size:13px">Cash ($k, they have ${fmt(b.cash)})</label><input id="tr-wc" type="number" inputmode="numeric" min="0" step="5" value="0"></div>
+  </div>
+  <p class="muted" id="tr-err" style="margin:0;color:var(--bad)" hidden></p>
+  <div class="row"><button class="btn primary" id="tr-send">Send offer</button><button class="btn" id="tr-close">Cancel</button></div>`;
+ $('tradeBox').hidden=false;
+ $('tr-to').onchange=e=>{tradeTo=Number(e.target.value);buildTrade();};
+ $('tr-close').onclick=closeTrade;
+ $('tr-send').onclick=()=>{const s=cur();if(!canPropose())return closeTrade();
+  const give=[...document.querySelectorAll('#tradeBox [id^="tr-g-"]:checked')].map(x=>Number(x.dataset.k));
+  const get=[...document.querySelectorAll('#tradeBox [id^="tr-w-"]:checked')].map(x=>Number(x.dataset.k));
+  const gc=Math.max(0,Math.round(Number($('tr-gc').value)||0)),wc=Math.max(0,Math.round(Number($('tr-wc').value)||0));
+  const err=t=>{$('tr-err').textContent=t;$('tr-err').hidden=false;};
+  if(!give.length&&!get.length&&!gc&&!wc)return err('Pick at least one suburb or some cash.');
+  if(gc>s.players[me].cash)return err(`You only have ${fmt(s.players[me].cash)}.`);
+  if(wc>s.players[them].cash)return err(`${s.players[them].name} only has ${fmt(s.players[them].cash)}.`);
+  closeTrade();act('propose',{from:me,to:them,give,giveCash:gc,get,getCash:wc});};
+}
+
+async function spin(){const s=cur();if(!canAct()||s.pending)return;anim=true;render();
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ for(let k=0;k<(reduce?1:10);k++){const el=document.querySelector('.spin span');if(el)el.firstChild.textContent=1+rnd(10);await sleep(55+k*8);}
+ anim=null;act('spin',1+rnd(10));}
+
+/* ---------- render ---------- */
+function pname(p){return esc(p.name)+(isMine(p)&&!multi()?' <span class="tag">you</span>':'');}
+function render(){const s=cur();
+ const home=mode==='home';
+ $('modeChip').textContent=home?'Not in a room':mode==='host'?`Room ${code} · host · ${conns.filter(c=>c.open).length} connected`:`Room ${code}${gotState?'':' · connecting…'}`;
+ $('roomBar').hidden=home;$('roomCode').textContent=code||'';
+ $('resetBtn').textContent=resetArm?'Tap again to wipe this game':'New game';
+ $('resetBtn').hidden=home||s.phase==='lobby';$('leaveRoom').hidden=home;
+ $('home').hidden=!home;
+ if(home){$('lobby').hidden=$('game').hidden=$('over').hidden=true;const sv=loadHost();$('resumeBtn').hidden=!sv;if(sv)$('resumeBtn').innerHTML=`Resume room ${esc(sv.code)}<small>${sv.s.phase==='play'?'Game in progress':'Lobby'} · ${sv.s.players.map(p=>esc(p.name)).join(', ')||'no players yet'}</small>`;return;}
+ $('lobby').hidden=s.phase!=='lobby';$('game').hidden=s.phase!=='play';$('over').hidden=s.phase!=='over';
+ if(s.phase==='lobby')renderLobby(s);else if(s.phase==='play')renderGame(s);else renderOver(s);}
+
+function renderLobby(s){
+ const ready=mode==='host'||gotState;
+ $('lobbyHint').innerHTML=!ready?`Connecting to room <b>${esc(code)}</b>…`:mode==='host'
+  ?`Share room code <b>${esc(code)}</b> or the invite link. Keep this page open: the game runs on your phone. Playing on one phone? Add everyone's names here.`
+  :'You’re in. Add your name, then wait for the host to start.';
+ $('seats').innerHTML=s.players.length?s.players.map((p,i)=>`<div class="seat"><span class="dot" style="background:${PCOL[p.color]};width:14px;height:14px"></span><span class="nm">${pname(p)}</span>${isMine(p)?`<button class="linkbtn" data-leave="${i}">Remove</button>`:''}</div>`).join(''):'<p class="muted" style="margin:0">No one has joined yet.</p>';
+ const mineN=s.players.filter(isMine).length;
+ $('joinBtn').textContent=mineN?'Add another player':'Join';
+ $('name').placeholder=mineN?'Another name (same phone)':'Your name';
+ const full=s.players.length>=4;$('joinBtn').disabled=full||busy||!ready;$('name').disabled=full||!ready;
+ $('laps').value=String(s.laps);$('laps').disabled=busy||!ready||!mineN;
+ $('startBtn').disabled=s.players.length<2||busy||!mineN;
+ $('startBtn').textContent=s.players.length<2?'Need at least 2 players':'Start game';
+}
+
+function renderGame(s){const me=s.players[s.turn];
+ let h='';
+ T.forEach(t=>{const [r,c]=pos2cell(t.i);const o=s.owned[t.i];
+  const here=s.players.map((p,j)=>p.pos===t.i&&!p.retired?`<span class="tok${j===s.turn?' now':''}" style="background:${PCOL[p.color]}"></span>`:'').join('');
+  h+=`<div class="tile k-${t.k}${t.c?' corner':''}" style="grid-row:${r};grid-column:${c}" data-tile="${t.i}" role="button" tabindex="0" aria-label="${esc(t.full)}">`+
+   (t.g?`<div class="strip" style="background:${GCOL[t.g]}">${o&&o.reno?'<span class="reno">★</span>':''}</div>`:'')+
+   `<div class="tn">${esc(t.n)}</div>${t.p?`<div class="tp">${fmt(t.p)}</div>`:''}`+
+   (o?`<div class="own" style="border-color:${PCOL[s.players[o.owner].color]}"></div>`:'')+`<div class="toks">${here}</div></div>`;});
+ const mine=canAct();const can=mine&&!s.pending&&!s.trade;
+ if(tradeOpen&&!canPropose())closeTrade();
+ const last=s.log[0]?esc(s.log[0].t):'';
+ const ev=info!=null?infoText(s,info):last;
+ h+=`<div class="center"><div class="whose" style="color:${PCOL[me.color]}">${esc(me.name)}${isMine(me)&&!multi()?' (you)':''}</div>
+  <div class="sub">${me.career?esc(me.career):'No job yet'} · lap ${Math.min(me.laps+1,s.laps)} of ${s.laps}</div>
+  <button class="spin${can?' go':''}" id="spinBtn" ${can?'':'disabled'} aria-label="Spin"><span>${s.lastSpin??'–'}<em>${can?'Tap to spin':'Spinner'}</em></span></button>
+  <div class="event">${ev}</div></div>`;
+ $('board').innerHTML=h;
+ $('decision').innerHTML=decisionHTML(s,mine);
+ if(!$('reacts').childElementCount)$('reacts').innerHTML=EMO.map((e,i)=>`<button data-r="${i}" aria-label="React ${e}">${e}</button>`).join('');
+ $('players').innerHTML=s.players.map((p,i)=>{const ps=ownedBy(s,i);
+  return `<div class="pc${i===s.turn?' turn':''}" style="border-left-color:${PCOL[p.color]}">
+   <div class="top"><span class="nm">${pname(p)}</span><span class="cash${p.cash<0?' neg':''}">${fmt(p.cash)}</span></div>
+   <div class="muted" style="font-size:13px">${p.career?`${esc(p.career)} · ${fmt(p.salary)}/lap`:'No job yet'}${p.degree?' · degree':''}${p.partner?' · married':''}${p.retired?' · <b>retired</b>':''}${p.skip?' · gap year':''}${owes(p)?' · owes Mum and Dad $50k':''}</div>
+   <div class="stats"><div>Joy<b>${p.happy}</b></div><div>Kids<b>${p.kids}</b></div><div>Laps<b>${p.laps}/${s.laps}</b></div><div>Worth<b>${fmt(worth(s,i).total)}</b></div></div>
+   ${ps.length?`<div class="props">${ps.map(k=>`<span class="pp" style="background:${GCOL[T[k].g]}">${esc(T[k].full)}${s.owned[k].reno?' ★':''}</span>`).join('')}</div>`:''}
+  </div>`}).join('');
+ $('log').innerHTML=s.log.map(e=>`<li><span class="dot" style="background:${e.c==null?'var(--muted)':PCOL[e.c]}"></span><span>${esc(e.t)}</span></li>`).join('');
+}
+function infoText(s,i){const t=T[i];if(t.k!=='prop')return `<b>${esc(t.full)}</b>: ${esc(t.d)}`;const o=s.owned[i];
+ return `<b>${esc(t.full)}</b>: ${fmt(t.p)}, rent ${fmt(t.r)}${o?` · owned by ${esc(s.players[o.owner].name)}, rent now ${fmt(rentOf(s,i))}`:' · for sale'}`;}
+
+function decisionHTML(s,mine){const p=s.players[s.turn],pd=s.pending;const who=esc(p.name);
+ if(s.trade){const t=s.trade,a=s.players[t.from],b=s.players[t.to];
+  const offer=`<dl class="offer"><dt>${esc(a.name)} gives</dt><dd>${esc(listNames(t.give,t.giveCash))}</dd><dt>${esc(b.name)} gives</dt><dd>${esc(listNames(t.get,t.getCash))}</dd></dl>`;
+  const both=isMine(a)&&isMine(b);
+  if(canAnswer())return `<h2>${both?`${esc(b.name)}, `:''}${esc(a.name)} wants to trade</h2>${offer}
+   <div class="row"><button class="btn primary" data-t="yes">Accept</button><button class="btn" data-t="no">Decline</button>${both?'<button class="btn" data-t="cancel">Withdraw offer</button>':''}</div>`;
+  if(mine)return `<h2>Offer sent to ${esc(b.name)}</h2>${offer}<div class="row"><button class="btn" data-t="cancel">Withdraw offer</button></div>`;
+  return `<p style="margin:0"><b style="color:${PCOL[a.color]}">${esc(a.name)}</b> <span class="muted">offered ${esc(b.name)} a trade.</span></p>${offer}`;}
+ if(!mine){if(anim||busy)return `<p class="muted" style="margin:0">Spinning…</p>`;
+  const what=!pd?'to spin':{path:'whether to go to uni',job:'a job',buy:'whether to buy',study:'whether to study',reno:'what to renovate'}[pd.type];
+  return `<p style="margin:0"><b style="color:${PCOL[p.color]}">${who}</b> <span class="muted">is deciding ${what}.</span></p>`;}
+ if(!pd)return `<p style="margin:0"><b>${!multi()?'Your turn':who+'’s turn'}.</b> <span class="muted">Tap the spinner in the middle of the board, or make a trade first.</span></p>
+  <div class="row"><button class="btn" data-t="open">Propose a trade</button>${owes(p)?`<button class="btn" data-a="repay"${p.cash<50?' disabled':''}>Pay Mum and Dad back<small>−$50k, +3 joy</small></button>`:`<button class="btn" data-a="borrow">Ask Mum and Dad<small>+$50k now, −2 joy every Payday until repaid</small></button>`}</div>`;
+ if(pd.type==='path')return `<h2>${who}, pick your path</h2><div class="stack">
+  <button class="btn primary" data-a="path" data-v="uni">Go to uni<small>Pay $40k now, choose from jobs paying $38k–$68k</small></button>
+  <button class="btn" data-a="path" data-v="work">Start working<small>Free, choose from jobs paying $18k–$34k</small></button></div>`;
+ if(pd.type==='job')return `<h2>${who}, choose a job</h2><div class="stack">${pd.options.map(n=>{const j=JOBS.find(x=>x.n===n);return `<button class="btn" data-a="job" data-v="${esc(n)}">${esc(n)}<small>${fmt(j.s)} every Payday</small></button>`}).join('')}
+  ${p.career?`<button class="btn" data-a="job" data-v="">Keep being a ${esc(p.career.toLowerCase())}<small>${fmt(p.salary)} every Payday</small></button>`:''}</div>`;
+ if(pd.type==='buy'){const t=T[pd.tile];return `<h2>Buy ${esc(t.full)}?</h2><p class="muted" style="margin:0 0 8px">Costs ${fmt(t.p)}. Rent ${fmt(t.r)}, double with both ${t.g==='A'?'purple':t.g==='B'?'teal':t.g==='C'?'coral':t.g==='D'?'blue':'red'} suburbs. You have ${fmt(p.cash)}.</p>
+  <div class="row"><button class="btn primary" data-a="buy" data-v="1">Buy for ${fmt(t.p)}</button><button class="btn" data-a="buy" data-v="">Pass</button></div>`;}
+ if(pd.type==='study')return `<h2>Go back to uni?</h2><p class="muted" style="margin:0 0 8px">Pay $40k for a degree and pick from two degree jobs.</p>
+  <div class="row"><button class="btn primary" data-a="study" data-v="1">Study (−$40k)</button><button class="btn" data-a="study" data-v="">Skip</button></div>`;
+ if(pd.type==='reno')return `<h2>Renovate a suburb?</h2><p class="muted" style="margin:0 0 8px">Pay half its price. Rent doubles and it's worth 1.5× at the end.</p><div class="stack">
+  ${pd.options.map(k=>`<button class="btn" data-a="reno" data-v="${k}">${esc(T[k].full)}<small>Costs ${fmt(T[k].p/2)}</small></button>`).join('')}
+  <button class="btn" data-a="reno" data-v="">Skip</button></div>`;
+ return '';}
+
+function renderOver(s){const rows=s.players.map((p,i)=>({p,w:worth(s,i)})).sort((a,b)=>b.w.total-a.w.total);
+ $('over').innerHTML=`<div class="panel stack"><span class="chip" style="align-self:flex-start">Final scores</span>
+  <div class="winner"><span style="color:${PCOL[rows[0].p.color]}">${esc(rows[0].p.name)}</span> wins with ${fmt(rows[0].w.total)}</div>
+  <div class="tblwrap"><table><thead><tr><th>Player</th><th>Cash</th><th>Suburbs</th><th>Joy</th><th>Owed</th><th>Total</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td><span class="dot" style="display:inline-block;background:${PCOL[r.p.color]}"></span> ${esc(r.p.name)}</td><td>${fmt(r.w.cash)}</td><td>${fmt(r.w.prop)}</td><td>${fmt(r.w.joy)}</td><td>${r.w.owed?fmt(-r.w.owed):'–'}</td><td><b>${fmt(r.w.total)}</b></td></tr>`).join('')}
+  </tbody></table></div>
+  ${'<button class="btn primary" data-a="reset" style="text-align:center">Play again with the same players</button>'}</div>`;}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+ const tb=e.target.closest('[data-t]');if(tb&&!tb.disabled){const v=tb.dataset.t;
+  if(v==='open'){openTrade();if(tradeOpen&&$('tradeBox').scrollIntoView)$('tradeBox').scrollIntoView({behavior:'smooth',block:'nearest'});}
+  else if(v==='cancel'){act('tradeCancel');}
+  else if(canAnswer())act('tradeAnswer',v==='yes');return;}
+ const rb=e.target.closest('[data-r]');if(rb){react(Number(rb.dataset.r));return;}
+ const b=e.target.closest('[data-a]');if(b&&!b.disabled){const a=b.dataset.a,v=b.dataset.v;
+  if(!canAct()&&a!=='reset')return;
+  if(a==='path')act('path',v);else if(a==='job')act('job',v||null);else if(a==='buy')act('buy',!!v);
+  else if(a==='study')act('study',!!v);else if(a==='reno')act('reno',v===''?null:Number(v));else if(a==='reset')act('reset');else if(a==='borrow'||a==='repay')act(a);return;}
+ if(e.target.closest('#spinBtn')){spin();return;}
+ const t=e.target.closest('[data-tile]');if(t){const i=Number(t.dataset.tile);info=info===i?null:i;render();return;}
+ const l=e.target.closest('[data-leave]');if(l){act('leave',Number(l.dataset.leave));return;}
+});
+document.addEventListener('keydown',e=>{const t=e.target.closest&&e.target.closest('[data-tile]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.click();}});
+function join(){const n=$('name').value.trim();if(!n)return $('name').focus();const s=cur();if(s.players.length>=4)return;
+ act('join',n.slice(0,14),ME);$('name').value='';}
+$('joinBtn').onclick=join;$('name').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
+$('laps').onchange=e=>act('laps',Number(e.target.value));
+$('startBtn').onclick=()=>act('start');
+$('resetBtn').onclick=()=>{if(!resetArm){resetArm=true;render();setTimeout(()=>{resetArm=false;render();},3500);return;}resetArm=false;act('reset');};
+
+
+/* ---------- reactions (live only, never saved) ---------- */
+function floatEmoji(i,who,col){if(!EMO[i])return;const f=document.createElement('div');f.className='float';f.style.left=(10+Math.random()*70)+'%';
+ f.innerHTML=`<span class="em">${EMO[i]}</span>${who?`<span class="who" style="background:${col}">${esc(who)}</span>`:''}`;
+ $('floats').appendChild(f);setTimeout(()=>f.remove(),2500);}
+function showReact(i,from){const p=S.players.find(x=>x.uid===from);floatEmoji(i,p?p.name:'',p?PCOL[p.color]:'var(--muted)');}
+function react(i){const now=Date.now();if(now-lastReact<700)return;lastReact=now;
+ const me=isMine(S.players[S.turn])?S.players[S.turn]:S.players.find(isMine);
+ floatEmoji(i,me?me.name:'',me?PCOL[me.color]:'var(--muted)');
+ if(mode==='host')conns.forEach(c=>{if(c.open)try{c.send({type:'react',e:i,from:ME});}catch(e){}});
+ else if(mode==='guest'&&hostConn&&hostConn.open)hostConn.send({type:'react',e:i});}
+
+/* ---------- home screen + boot ---------- */
+$('hostBtn').onclick=()=>hostRoom(newCode(),null);
+$('resumeBtn').onclick=()=>{const sv=loadHost();if(sv)hostRoom(sv.code,sv.s);};
+function joinCode(){const c=$('codeIn').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');if(c.length!==4){$('codeIn').focus();return;}joinRoom(c);}
+$('joinCodeBtn').onclick=joinCode;$('codeIn').addEventListener('keydown',e=>{if(e.key==='Enter')joinCode();});
+$('leaveRoom').onclick=leaveRoom;
+$('inviteBtn').onclick=async()=>{const url=location.origin+location.pathname+'#'+code;
+ try{if(navigator.share){await navigator.share({title:'Hustle Street',text:`Join my Hustle Street game. Room ${code}`,url});return;}}catch(e){if(e&&e.name==='AbortError')return;}
+ try{await navigator.clipboard.writeText(url);$('inviteBtn').textContent='Link copied';setTimeout(()=>$('inviteBtn').textContent='Invite',2000);}catch(e){banner('Invite link: '+url);}};
+(function boot(){
+ if(typeof Peer==='undefined'){banner('The connection library didn’t load. Check your internet and refresh.');}
+ const m=/^#([A-Z0-9]{4})$/i.exec(location.hash);
+ if(m){const c=m[1].toUpperCase();const sv=loadHost();if(sv&&sv.code===c)hostRoom(c,sv.s);else joinRoom(c);}
+ else render();
+})();
+</script>
+</body>
+</html>

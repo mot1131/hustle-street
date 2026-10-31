@@ -212,12 +212,12 @@ details.card ul{padding-left:18px;margin:4px 0 0;display:flex;flex-direction:col
 .pod .tt{font-family:var(--f-display);font-size:18px;line-height:1.1;margin-bottom:6px}
 .pod .blk{width:100%;background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:10px 10px 0 0;display:flex;justify-content:center;padding-top:10px;font-family:var(--f-display);font-size:34px;line-height:1}
 .tbl{overflow-x:auto;border:3px solid var(--ink);border-radius:16px;background:#fff;box-shadow:0 6px 0 var(--deep)}
-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13.5px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12.5px}
 th{background:var(--mist);font-weight:900;border-bottom:2.5px solid var(--ink)}
-th,td{text-align:right;padding:9px 6px;white-space:nowrap}
+th,td{text-align:right;padding:9px 4px;white-space:nowrap}
 td{font-weight:700;border-bottom:1.5px solid var(--line)}
-th:first-child,td:first-child{text-align:left;padding-left:10px}
-th:last-child,td:last-child{padding-right:10px}
+th:first-child,td:first-child{text-align:left;padding-left:8px}
+th:last-child,td:last-child{padding-right:8px}
 td.owed{color:var(--bad)}
 
 /* overlays + floating reactions */
@@ -248,6 +248,44 @@ td.owed{color:var(--bad)}
 .float .who{font-size:12px;font-weight:900;color:var(--ink);padding:1px 8px;border-radius:99px;border:2px solid var(--ink);margin-top:2px}
 @keyframes rise{0%{transform:translateY(20px) scale(.6);opacity:0}15%{transform:translateY(0) scale(1.1);opacity:1}100%{transform:translateY(-45vh) scale(1);opacity:0}}
 @media (prefers-reduced-motion: reduce){.float{animation:none;bottom:45%}}
+/* ---- auctions, buildings, timer, awards, rules ---- */
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.row3 .big{font-size:20px;padding:9px 4px 10px}
+.row3 .btn.c{padding:10px 4px;font-size:13.5px;gap:5px}
+.auc{display:flex;justify-content:space-between;align-items:stretch;gap:0;border:3px solid var(--ink);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 4px 0 var(--ink)}
+.auc-l{flex:1;min-width:0;padding:9px 10px 9px 12px;border-left:10px solid var(--g);display:flex;flex-direction:column;gap:2px}
+.auc-r{background:var(--sunsoft);border-left:3px solid var(--ink);padding:9px 12px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px}
+.auc-amt{font-family:var(--f-display);font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.auc-amt.none{color:var(--muted)}
+@media (prefers-reduced-motion: no-preference){.auc-amt{animation:hubpop2 .45s cubic-bezier(.2,1.7,.4,1)}}
+@keyframes hubpop2{from{transform:scale(.5)}}
+.bidders{display:flex;flex-wrap:wrap;gap:6px}
+.bidder{font-family:var(--f-cond);font-weight:800;font-size:14px;padding:3px 10px 3px 14px;border-radius:999px;border:2px solid var(--ink);background:#fff;box-shadow:inset 7px 0 0 var(--c)}
+.bidder.now{background:var(--sunsoft);outline:2px solid var(--ink)}
+.bidder.lead::after{content:" · leading"}
+.bidder.out{opacity:.4;text-decoration:line-through}
+.lvl{position:absolute;left:3px;top:50%;transform:translateY(-50%);display:flex;gap:1.5px}
+.lvl i{width:6px;height:6px;background:#2BB673;border:1.3px solid var(--ink);border-radius:1px}
+.lvl i.h{width:13px;background:#E11D48}
+.pot{display:flex;align-items:center;gap:6px;background:var(--sun);border:2.5px solid var(--ink);border-radius:999px;padding:3px 11px 2px;font-family:var(--f-cond);font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;box-shadow:0 3px 0 var(--ink)}
+.pot b{font-family:var(--f-display);font-weight:400;font-size:16px;letter-spacing:0}
+.tmr{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-family:var(--f-display);font-size:18px;line-height:1;background:var(--mist);border:2px solid var(--ink);border-radius:999px;padding:3px 10px 2px;font-variant-numeric:tabular-nums}
+.tmr.low{background:var(--red);color:#fff}
+@media (prefers-reduced-motion: no-preference){.tmr.low{animation:throb .5s ease-in-out infinite alternate}}
+@keyframes throb{to{transform:scale(1.12)}}
+.rules{display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px 12px;align-items:center}
+.rules label{font-weight:900;font-size:14.5px}
+.rules .inp{padding:9px 10px}
+.awards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.award{background:#fff;border:3px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--deep);padding:11px;display:flex;flex-direction:column;gap:3px;min-width:0}
+@media (prefers-reduced-motion: no-preference){.award{animation:awardin .55s cubic-bezier(.2,1.5,.4,1) both}}
+@keyframes awardin{from{transform:translateY(24px) scale(.85);opacity:0}}
+.award:last-child:nth-child(odd){grid-column:1/-1}
+.aw-ic{width:38px;height:38px;border-radius:50%;background:var(--c);border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;margin-bottom:3px}
+.aw-t{font-family:var(--f-cond);font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.aw-who{font-family:var(--f-display);font-size:20px;line-height:1.05}
+.aw-d{font-size:13px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.pawn.mini{--s:.55}.pawn.mini .bs{display:none}
 /* ---- motion + feedback layer ---- */
 .topr{display:flex;gap:8px;align-items:center;margin-left:auto}
 .sound{width:40px;height:34px;border-radius:999px;background:var(--paper);border:2.5px solid var(--ink);box-shadow:0 3px 0 var(--deep);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);padding:0}
@@ -308,6 +346,7 @@ td.owed{color:var(--bad)}
     <div class="topr"><button class="invite" id="inviteBtn" hidden>Invite</button><button class="sound" id="soundBtn" aria-label="Sound on" aria-pressed="true"></button></div>
   </header>
   <div class="banner" id="banner" role="status" hidden></div>
+  <div class="card" id="rejoin" hidden></div>
 
   <section id="home" class="stack" style="gap:18px" hidden>
     <div class="signwrap" style="padding-top:10px">
@@ -339,15 +378,25 @@ td.owed{color:var(--bad)}
       <h2 class="h">Who's playing?</h2>
       <div id="seats"></div>
       <div class="joinrow"><input class="inp" id="name" maxlength="14" placeholder="Your name" autocomplete="off"><button class="big mint" id="joinBtn">Join</button></div>
-      <div class="lapsrow"><label for="laps">Game length</label>
-        <select class="inp" id="laps">
-          <option value="2">Quick · 2 laps</option>
-          <option value="3">Standard · 3 laps</option>
-          <option value="4">Long · 4 laps</option>
-        </select>
-      </div>
-      <p class="hint">Quick is about 20 minutes, Standard 35, Long 50.</p>
       <button class="big" id="startBtn">Start game</button>
+    </div>
+    <div class="card">
+      <h2 class="h sm">House rules</h2>
+      <div class="rules">
+        <label for="laps">Game length</label>
+        <select class="inp" id="laps"><option value="2">Quick · 2 laps</option><option value="3">Standard · 3 laps</option><option value="4">Long · 4 laps</option></select>
+        <label for="r-cash">Starting cash</label>
+        <select class="inp" id="r-cash"><option value="100">$100k</option><option value="150">$150k</option><option value="200">$200k</option></select>
+        <label for="r-loan">Mum &amp; Dad loan</label>
+        <select class="inp" id="r-loan"><option value="30">$30k</option><option value="50">$50k</option><option value="80">$80k</option></select>
+        <label for="r-timer">Turn timer</label>
+        <select class="inp" id="r-timer"><option value="0">Off</option><option value="60">60 seconds</option><option value="90">90 seconds</option></select>
+        <label for="r-auctions">Auctions</label>
+        <select class="inp" id="r-auctions"><option value="true">On</option><option value="false">Off</option></select>
+        <label for="r-jackpot">Gap Year jackpot</label>
+        <select class="inp" id="r-jackpot"><option value="false">Off</option><option value="true">On</option></select>
+      </div>
+      <p class="hint">Quick takes about 20 minutes, Standard 35, Long 50. With the jackpot on, tax, fines and bills go into a pot that whoever lands on Gap Year wins. If the timer runs out, the game plays a safe move for you.</p>
     </div>
   </section>
 
@@ -368,10 +417,14 @@ td.owed{color:var(--bad)}
       <li><b>Joining</b>: one person taps Host and shares the room code. Everyone else opens the link and joins. Keep the host's screen on. If the host closes the page the game pauses until they reopen it and tap Resume.</li>
       <li><b>Moving</b>: spin 1–10 and go clockwise. First turn, choose uni ($40k, better-paid jobs) or start working straight away.</li>
       <li><b>Payday</b>: each time you pass it you collect your salary, minus $3k per kid. Negative cash costs 10% interest.</li>
-      <li><b>Suburbs</b>: buy them when you land on an empty one. Others pay you rent. Own both suburbs of a colour and rent doubles. Reno spaces let you renovate one of yours: rent doubles again and it's worth 1.5× at the end.</li>
+      <li><b>Suburbs</b>: buy them when you land on an empty one. Others pay you rent. Own both suburbs of a colour and rent doubles.</li>
+      <li><b>Auctions</b>: if you pass on a suburb (or can't afford it), everyone takes turns bidding. Fold to drop out; the last bidder standing wins.</li>
+      <li><b>Houses and hotels</b>: on your turn, before you spin, build on any suburb where you own the whole colour. 1 house triples the rent, 2 houses is ×5, a hotel is ×8. Each costs half the suburb's price. Reno spaces let you add one anywhere you own, set or not.</li>
       <li><b>Trading</b>: on your turn, before you spin, offer suburbs and cash to another player.</li>
-      <li><b>Bank of Mum and Dad</b>: borrow $50k on your turn. You lose 2 joy each Payday until you pay it back; repaying earns 3 joy. Anything owed comes off your final score.</li>
-      <li><b>Joy</b> comes from weddings, babies, holidays, gap years and good Life cards. Each point is worth $5k at the end.</li>
+      <li><b>Bank of Mum and Dad</b>: borrow money on your turn (the amount is a house rule). You lose 2 joy each Payday until you pay it back; repaying earns 3 joy. Anything owed comes off your final score.</li>
+      <li><b>Joy</b> comes from weddings, babies, holidays, gap years and good Life cards. Each point is worth $5k at the end. You also get $20k per kid and $25k for being married.</li>
+      <li><b>Life cards</b> include a few sneaky ones: Career Swap and Robin Hood let you pick a target.</li>
+      <li><b>Lost your phone?</b> Open the invite link on any device and tap your name to rejoin.</li>
       <li>After your last lap you retire (first retiree gets $30k, second $15k, third $5k). Retired players still collect rent. When everyone has retired, the highest net worth wins.</li>
     </ul>
   </details>
@@ -419,6 +472,7 @@ const IC={
  chart:'M3 20h18 M6 16v-4 M10 16V8 M14 16v-6 M18 16V5',
  medal:'M8 3l4 7 4-7 M12 10a5.5 5.5 0 1 0 0.01 0 M12 13v4',
  swap:'M4 8h14l-4-4 M20 16H6l4 4',
+ clock:'M12 3a9 9 0 1 0 0.01 0 M12 7v5l3 2',
  soundon:'M4 9v6h4l5 4V5L8 9z M16.5 9a4 4 0 0 1 0 6 M19 6.5a7.5 7.5 0 0 1 0 11',
  soundoff:'M4 9v6h4l5 4V5L8 9z M17 9.5l5 5 M22 9.5l-5 5'
 };
@@ -452,34 +506,56 @@ const JOBS=[{n:'Barista',s:18,d:0},{n:'Hairdresser',s:22,d:0},{n:'Retail manager
  {n:'Teacher',s:38,d:1},{n:'Nurse',s:40,d:1},{n:'Accountant',s:46,d:1},{n:'Engineer',s:52,d:1},{n:'Lawyer',s:60,d:1},{n:'Doctor',s:68,d:1}];
 
 /* ---------- state helpers ---------- */
-const fresh=()=>({phase:'lobby',players:[],turn:0,laps:3,owned:{},log:[],pending:null,trade:null,lastSpin:null,spinSeq:0,card:null,rev:0});
+const RULE_OPTS={cash:[100,150,200],loan:[30,50,80],timer:[0,60,90],auctions:[true,false],jackpot:[false,true]};
+const DEF_RULES={cash:150,loan:50,timer:0,auctions:true,jackpot:false};
+const fresh=()=>({phase:'lobby',players:[],turn:0,laps:3,rules:Object.assign({},DEF_RULES),owned:{},log:[],pending:null,trade:null,auction:null,lastSpin:null,spinSeq:0,card:null,pot:0,stats:null,bestTrade:null,deadline:null,rev:0});
+const newStats=()=>({spins:0,spinSum:0,rentIn:0,rentOut:0,cards:0,auctions:0,built:0});
 function newPlayer(s,name,uid){const used=s.players.map(p=>p.color);let c=0;while(used.includes(c))c++;
- return {name,uid:uid||null,color:c,pos:0,cash:150,career:null,salary:0,degree:false,happy:0,kids:0,partner:false,laps:0,retired:false,skip:false,loan:0};}
+ return {name,uid:uid||null,color:c,pos:0,cash:150,career:null,salary:0,degree:false,happy:0,kids:0,partner:false,laps:0,retired:false,skip:false,loan:0,freeRent:false};}
+function normalize(s){const f=fresh();for(const k in f)if(!(k in s))s[k]=f[k];s.rules=Object.assign({},DEF_RULES,s.rules||{});
+ for(const k in s.owned){const o=s.owned[k];if(o.level==null){o.level=o.reno?1:0;delete o.reno;}}
+ s.players.forEach(p=>{if(p.loan==null)p.loan=0;if(p.freeRent==null)p.freeRent=false;});
+ if(s.phase!=='lobby'&&!s.stats)s.stats=s.players.map(newStats);return s;}
 function log(s,i,t){s.log.unshift({t,c:i==null?null:s.players[i].color});s.log=s.log.slice(0,40);}
 const owes=p=>p.loan||0;
 const ownedBy=(s,i)=>Object.keys(s.owned).filter(k=>s.owned[k].owner===i).map(Number);
-function rentOf(s,idx){const t=T[idx],o=s.owned[idx];const set=T.filter(x=>x.g===t.g).every(x=>s.owned[x.i]&&s.owned[x.i].owner===o.owner);return t.r*(set?2:1)*(o.reno?2:1);}
-function worth(s,i){const p=s.players[i];let prop=0;ownedBy(s,i).forEach(k=>{prop+=T[k].p*(s.owned[k].reno?1.5:1)});return {cash:p.cash,prop:Math.round(prop),joy:p.happy*5,owed:owes(p),total:Math.round(p.cash+prop+p.happy*5-owes(p))};}
+const LVL=[1,3,5,8],LVLNAME=['no houses','1 house','2 houses','a hotel'];
+const hasSet=(s,i,g)=>T.filter(x=>x.g===g).every(x=>s.owned[x.i]&&s.owned[x.i].owner===i);
+const buildCost=k=>T[k].p/2;
+function rentOf(s,idx){const t=T[idx],o=s.owned[idx],lv=o.level||0;return lv?t.r*LVL[lv]:t.r*(hasSet(s,o.owner,t.g)?2:1);}
+const family=p=>p.kids*20+(p.partner?25:0);
+function worth(s,i){const p=s.players[i];let prop=0;ownedBy(s,i).forEach(k=>{prop+=T[k].p*(1+.5*(s.owned[k].level||0))});const fam=family(p);
+ return {cash:p.cash,prop:Math.round(prop),joy:p.happy*5,fam,owed:owes(p),total:Math.round(p.cash+prop+p.happy*5+fam-owes(p))};}
+function spend(s,p,amt){p.cash-=amt;if(s.rules&&s.rules.jackpot&&amt>0)s.pot=(s.pot||0)+amt;}
+const stat=(s,i)=>(s.stats&&s.stats[i])||newStats();
+const buildable=(s,i)=>ownedBy(s,i).filter(k=>hasSet(s,i,T[k].g)&&(s.owned[k].level||0)<3);
 function pick2(list,exclude){const pool=list.filter(j=>j.n!==exclude);const a=pool.splice(rnd(pool.length),1)[0];const b=pool.splice(rnd(pool.length),1)[0];return [a,b].filter(Boolean).map(j=>j.n);}
 const C=(t,d,fx,kind,icon)=>({t,d,fx,kind,icon});
 const an=w=>/^[aeiou]/i.test(w)?'an':'a';
 const CARDS=[
  (s,i,p)=>{p.cash+=10;return C('Tax refund','The ATO owes you one, for once.','+$10K','money','tax')},
- (s,i,p)=>{p.cash-=8;return C('New tyres for the ute','Bald as. Had to be done.','−$8K','cost','tyre')},
+ (s,i,p)=>{spend(s,p,8);return C('New tyres for the ute','Bald as. Had to be done.','−$8K','cost','tyre')},
  (s,i,p)=>{p.happy+=2;return C('Won the meat tray','Your raffle ticket came up at the pub on a Friday arvo.','+2 JOY','joy','trophy')},
- (s,i,p)=>{const w=Math.random()<.5;p.cash+=w?30:-20;return w?C('Crypto punt paid off','Your mate’s coin actually went to the moon.','+$30K','money','chart'):C('Crypto punt flopped','It went to zero overnight. Classic.','−$20K','cost','chart')},
+ (s,i,p)=>{const w=Math.random()<.5;if(w)p.cash+=30;else spend(s,p,20);return w?C('Crypto punt paid off','Your mate’s coin actually went to the moon.','+$30K','money','chart'):C('Crypto punt flopped','It went to zero overnight. Classic.','−$20K','cost','chart')},
  (s,i,p)=>{p.cash+=12;return C('Footy tipping champ','Top of the office ladder by one game.','+$12K','money','trophy')},
- (s,i,p)=>{p.cash-=5;return C('Speed camera','Flashed on South Road doing 68 in a 60.','−$5K','cost','camera')},
+ (s,i,p)=>{spend(s,p,5);return C('Speed camera','Flashed on South Road doing 68 in a 60.','−$5K','cost','camera')},
  (s,i,p)=>{p.cash+=40;return C('Inheritance','A great-aunt remembered you in her will.','+$40K','money','coin')},
  (s,i,p)=>{let c=0;for(const k in s.owned){s.players[s.owned[k].owner].cash+=5;c++}return C('Property boom',c?'Every landlord collects $5k per suburb they own.':'Prices are up, but nobody owns a suburb yet.',c?'LANDLORDS +$5K':'NO EFFECT','money','house')},
- (s,i,p)=>{const c=ownedBy(s,i).length;p.cash-=3*c;return C('Interest rates rise',c?`$3k for each of your ${c} suburb${c>1?'s':''}.`:'Good thing you rent.',c?`−$${3*c}K`:'NO EFFECT','cost','up')},
- (s,i,p)=>{p.cash-=4;p.happy+=6;return C('Adopted a rescue dog','Best decision you ever made.','+6 JOY · −$4K','joy','heart')},
+ (s,i,p)=>{const c=ownedBy(s,i).length;spend(s,p,3*c);return C('Interest rates rise',c?`$3k for each of your ${c} suburb${c>1?'s':''}.`:'Good thing you rent.',c?`−$${3*c}K`:'NO EFFECT','cost','up')},
+ (s,i,p)=>{spend(s,p,4);p.happy+=6;return C('Adopted a rescue dog','Best decision you ever made.','+6 JOY · −$4K','joy','heart')},
  (s,i,p)=>{p.happy+=4;return C('City-Bay fun run','12 km and only one stitch.','+4 JOY','joy','medal')},
- (s,i,p)=>{p.cash-=2;return C('Cracked your phone','Face down on the driveway.','−$2K','cost','phone')},
+ (s,i,p)=>{spend(s,p,2);return C('Cracked your phone','Face down on the driveway.','−$2K','cost','phone')},
  (s,i,p)=>{const b=Math.round(p.salary/2);p.cash+=b;return C('Bonus at work',b?'The boss noticed. Half a lap’s pay.':'No job, no bonus.',b?'+'+fmt(b).toUpperCase():'NO EFFECT','money','case')},
  (s,i,p)=>{let t=0;s.players.forEach((q,j)=>{if(j!==i){q.cash-=5;t+=5}});p.cash+=t;return C('It’s your birthday','Everyone chips in $5k.','+'+fmt(t).toUpperCase(),'money','gift')},
  (s,i,p)=>{p.happy+=5;return C('Volunteered at the footy club','Sausage sizzle legend.','+5 JOY','joy','heart')},
- (s,i,p)=>{p.cash-=10;return C('Hot water system burst','Cold showers for a week, then the bill.','−$10K','cost','drop')},
+ (s,i,p)=>{spend(s,p,10);return C('Hot water system burst','Cold showers for a week, then the bill.','−$10K','cost','drop')},
+ (s,i,p)=>{const opts=s.players.map((q,j)=>j).filter(j=>j!==i&&s.players[j].career&&s.players[j].career!==p.career);
+  if(!opts.length||!p.career)return C('Career swap','Nobody worth swapping with right now.','NO EFFECT','joy','swap');
+  s.pending={type:'target',act:'swapjob',options:opts};return C('Career swap','Swap jobs with any player. Choose wisely.','PICK A PLAYER','money','swap')},
+ (s,i,p)=>{const opts=s.players.map((q,j)=>j).filter(j=>j!==i);s.pending={type:'target',act:'pinch',options:opts};return C('Robin Hood','Pinch $15k from any player you like.','PICK A PLAYER','money','bolt')},
+ (s,i,p)=>{p.freeRent=true;return C('Mates rates','Your next rent payment is on the house.','FREE RENT','joy','house')},
+ (s,i,p)=>{let r=-Infinity,j=-1;s.players.forEach((q,k)=>{if(k!==i&&q.cash>r){r=q.cash;j=k;}});if(j<0)return C('A mate shouts','Nobody around to shout you.','NO EFFECT','joy','gift');
+  s.players[j].cash-=15;p.cash+=15;return C('Your rich mate shouts',`${s.players[j].name} covers your big night out.`,'+$15K','money','gift')},
 ];
 
 /* ---------- game rules ---------- */
@@ -489,43 +565,68 @@ function payday(s,i){const p=s.players[i];p.laps++;const pay=p.salary-p.kids*3;p
  if(owes(p)){p.happy-=2;log(s,i,`Mum asked ${p.name} about the loan again. −2 joy`);}
  if(p.laps>=s.laps){p.retired=true;p.pos=0;const order=s.players.filter(x=>x.retired).length;const b=[30,15,5][order-1]||0;p.cash+=b;log(s,i,`${p.name} retires${b?` with a ${fmt(b)} bonus`:''}`);}
 }
-function doSpin(s,n){const i=s.turn,p=s.players[i];s.lastSpin=n;s.spinSeq=(s.spinSeq||0)+1;log(s,i,`${p.name} spun ${n}`);
+function doSpin(s,n){const i=s.turn,p=s.players[i];s.lastSpin=n;s.spinSeq=(s.spinSeq||0)+1;const st=s.stats&&s.stats[i];if(st){st.spins++;st.spinSum+=n;}log(s,i,`${p.name} spun ${n}`);
  for(let k=0;k<n;k++){p.pos=(p.pos+1)%28;if(p.pos===0){payday(s,i);if(p.retired){endTurn(s);return;}}}
  land(s,i);}
 function land(s,i){const p=s.players[i],t=T[p.pos];
  switch(t.k){
   case 'payday':break;
   case 'prop':{const o=s.owned[p.pos];
-    if(!o){if(p.cash>=t.p){s.pending={type:'buy',tile:p.pos};return;}log(s,i,`${p.name} can't afford ${t.full} (${fmt(t.p)})`);break;}
+    if(!o){if(p.cash>=t.p){s.pending={type:'buy',tile:p.pos};return;}log(s,i,`${p.name} can't afford ${t.full} (${fmt(t.p)})`);if(startAuction(s,p.pos))return;break;}
     if(o.owner===i){log(s,i,`${p.name} drops by their place in ${t.full}`);break;}
-    const amt=rentOf(s,p.pos);p.cash-=amt;s.players[o.owner].cash+=amt;log(s,i,`${p.name} paid ${fmt(amt)} rent to ${s.players[o.owner].name} in ${t.full}`);break;}
-  case 'life':{const c=CARDS[rnd(CARDS.length)](s,i,p);s.card=Object.assign({seq:((s.card&&s.card.seq)||0)+1,by:i},c);log(s,i,`${p.name} drew “${c.t}”: ${c.fx.toLowerCase()}`);break;}
-  case 'tax':{const a=Math.max(0,Math.round(p.cash*0.1));p.cash-=a;log(s,i,`${p.name} paid ${fmt(a)} tax`);break;}
+    if(p.freeRent){p.freeRent=false;log(s,i,`${p.name} used mates rates: no rent in ${t.full}`);break;}
+    const amt=rentOf(s,p.pos);p.cash-=amt;s.players[o.owner].cash+=amt;
+    if(s.stats){s.stats[i].rentOut+=amt;s.stats[o.owner].rentIn+=amt;}
+    log(s,i,`${p.name} paid ${fmt(amt)} rent to ${s.players[o.owner].name} in ${t.full}`);break;}
+  case 'life':{const c=CARDS[rnd(CARDS.length)](s,i,p);s.card=Object.assign({seq:((s.card&&s.card.seq)||0)+1,by:i},c);if(s.stats)s.stats[i].cards++;
+    log(s,i,`${p.name} drew “${c.t}”: ${c.fx.toLowerCase()}`);if(s.pending)return;break;}
+  case 'tax':{const a=Math.max(0,Math.round(p.cash*0.1));spend(s,p,a);log(s,i,`${p.name} paid ${fmt(a)} tax`);break;}
   case 'uni':if(!p.degree){if(p.cash>=40){s.pending={type:'study'};return;}log(s,i,`${p.name} can't afford uni right now`);}else{p.cash+=5;log(s,i,`${p.name} gave a guest lecture. +$5k`);}break;
   case 'jobfair':s.pending={type:'job',options:pick2(JOBS.filter(j=>p.degree||!j.d),p.career),after:'end'};return;
   case 'hustle':{const n=1+rnd(10),a=n*3;p.cash+=a;log(s,i,`${p.name}'s side gig spun ${n}: +${fmt(a)}`);break;}
   case 'baby':if(p.partner){p.kids++;p.happy+=5;log(s,i,`${p.name} had a baby! +5 joy (kid #${p.kids})`);}else{p.happy+=2;log(s,i,`${p.name} babysat for a friend. +2 joy`);}break;
-  case 'wedding':if(!p.partner){p.partner=true;p.happy+=10;let g=0;s.players.forEach((q,j)=>{if(j!==i){q.cash-=5;g+=5}});p.cash+=g;log(s,i,`${p.name} got married! +10 joy, +${fmt(g)} in gifts`);}else{p.happy+=3;p.cash-=5;log(s,i,`${p.name}'s anniversary dinner. −$5k, +3 joy`);}break;
+  case 'wedding':if(!p.partner){p.partner=true;p.happy+=10;let g=0;s.players.forEach((q,j)=>{if(j!==i){q.cash-=5;g+=5}});p.cash+=g;log(s,i,`${p.name} got married! +10 joy, +${fmt(g)} in gifts`);}else{p.happy+=3;spend(s,p,5);log(s,i,`${p.name}'s anniversary dinner. −$5k, +3 joy`);}break;
   case 'promo':if(p.career){p.salary+=6;log(s,i,`${p.name} got promoted. Salary now ${fmt(p.salary)}`);}else{p.cash+=5;log(s,i,`${p.name} picked up a cash job. +$5k`);}break;
-  case 'holiday':p.cash-=12;p.happy+=6;log(s,i,`${p.name} went to Kangaroo Island. −$12k, +6 joy`);break;
-  case 'gap':p.skip=true;p.happy+=4;log(s,i,`${p.name} takes a gap year. +4 joy, misses next turn`);break;
-  case 'reno':{const opts=ownedBy(s,i).filter(k=>!s.owned[k].reno&&p.cash>=T[k].p/2);if(opts.length){s.pending={type:'reno',options:opts};return;}log(s,i,`${p.name} has nothing to renovate`);break;}
+  case 'holiday':spend(s,p,12);p.happy+=6;log(s,i,`${p.name} went to Kangaroo Island. −$12k, +6 joy`);break;
+  case 'gap':p.skip=true;p.happy+=4;log(s,i,`${p.name} takes a gap year. +4 joy, misses next turn`);
+    if(s.rules.jackpot&&s.pot>0){const pot=s.pot;p.cash+=pot;s.pot=0;log(s,i,`${p.name} won the jackpot: +${fmt(pot)}!`);}break;
+  case 'reno':{const opts=ownedBy(s,i).filter(k=>(s.owned[k].level||0)<3&&p.cash>=buildCost(k));if(opts.length){s.pending={type:'reno',options:opts};return;}log(s,i,`${p.name} has nothing to renovate`);break;}
  }
  endTurn(s);}
-function endTurn(s){s.pending=null;s.trade=null;const n=s.players.length;
+function endTurn(s){s.pending=null;s.trade=null;s.auction=null;const n=s.players.length;
  if(s.players.every(p=>p.retired)){s.phase='over';log(s,null,'Everyone has retired. Game over!');return;}
  let idx=s.turn;
  for(let guard=0;guard<n*3;guard++){idx=(idx+1)%n;const p=s.players[idx];if(p.retired)continue;
   if(p.skip){p.skip=false;log(s,idx,`${p.name} is on their gap year and skips a turn`);continue;}
   s.turn=idx;if(!p.career)s.pending={type:'path'};return;}
 }
+/* auctions: everyone bids in turn; the last one standing wins */
+function startAuction(s,tile){if(!s.rules.auctions)return false;const n=s.players.length;const order=[];
+ for(let k=1;k<=n;k++){const i=(s.turn+k)%n;if(s.players[i].cash>=10)order.push(i);}
+ if(!order.length)return false;
+ s.pending=null;s.auction={tile,high:0,leader:null,order,cur:-1,folded:[]};log(s,null,`${T[tile].full} goes to auction!`);nextBidder(s);return true;}
+function nextBidder(s){const a=s.auction;const live=a.order.filter(i=>!a.folded.includes(i));
+ if(!live.length||(live.length===1&&a.leader===live[0]))return finishAuction(s);
+ let k=a.cur;for(let g=0;g<a.order.length*2;g++){k=(k+1)%a.order.length;const i=a.order[k];
+  if(a.folded.includes(i)||i===a.leader)continue;
+  if(s.players[i].cash<a.high+10){a.folded.push(i);log(s,i,`${s.players[i].name} can't match the bid`);
+   const l2=a.order.filter(x=>!a.folded.includes(x));if(!l2.length||(l2.length===1&&a.leader===l2[0]))return finishAuction(s);continue;}
+  a.cur=k;return;}
+ finishAuction(s);}
+function finishAuction(s){const a=s.auction,t=T[a.tile];
+ if(a.leader!=null){const w=s.players[a.leader];w.cash-=a.high;s.owned[a.tile]={owner:a.leader,level:0};if(s.stats)s.stats[a.leader].auctions++;log(s,a.leader,`Sold! ${w.name} wins ${t.full} for ${fmt(a.high)}`);}
+ else log(s,null,`Nobody bid on ${t.full}`);
+ s.auction=null;endTurn(s);}
+function tradeValue(s,t){const v=ks=>ks.reduce((n,k)=>n+T[k].p*(1+.5*((s.owned[k]&&s.owned[k].level)||0)),0);return v(t.give)+v(t.get)+t.giveCash+t.getCash;}
 function listNames(ks,cash){const parts=ks.map(k=>T[k].full);if(cash>0)parts.push(fmt(cash));return parts.length?parts.join(', '):'nothing';}
 function tradeLine(s,t){return `${s.players[t.from].name} gives ${listNames(t.give,t.giveCash)}, ${s.players[t.to].name} gives ${listNames(t.get,t.getCash)}`;}
 const A={
  join:(s,name,uid)=>{s.players.push(newPlayer(s,name,uid))},
  leave:(s,i)=>{s.players.splice(i,1)},
  laps:(s,v)=>{s.laps=v},
- start:(s)=>{s.phase='play';s.turn=0;s.pending={type:'path'};s.log=[];log(s,null,`Game on: ${s.players.length} players, ${s.laps} laps`);},
+ rules:(s,k,v)=>{s.rules[k]=v},
+ start:(s)=>{s.phase='play';s.turn=0;s.players.forEach(p=>{p.cash=s.rules.cash;});s.stats=s.players.map(newStats);s.pot=0;s.bestTrade=null;s.pending={type:'path'};s.log=[];
+  log(s,null,`Game on: ${s.players.length} players, ${s.laps} laps, $${s.rules.cash}k each`);},
  spin:doSpin,
  path:(s,ch)=>{const p=s.players[s.turn];if(ch==='uni'){p.cash-=40;p.degree=true;log(s,s.turn,`${p.name} heads to uni. −$40k`);s.pending={type:'job',options:pick2(JOBS.filter(j=>j.d)),after:'spin'};}
   else{log(s,s.turn,`${p.name} skips uni and starts working`);s.pending={type:'job',options:pick2(JOBS.filter(j=>!j.d)),after:'spin'};}},
@@ -534,22 +635,34 @@ const A={
   else log(s,s.turn,`${p.name} keeps their job`);
   if(after==='spin')s.pending=null;else endTurn(s);},
  buy:(s,yes)=>{const i=s.turn,p=s.players[i],t=T[s.pending.tile];
-  if(yes){p.cash-=t.p;s.owned[t.i]={owner:i,reno:false};log(s,i,`${p.name} bought ${t.full} for ${fmt(t.p)}`);}else log(s,i,`${p.name} passed on ${t.full}`);
-  endTurn(s);},
+  if(yes){p.cash-=t.p;s.owned[t.i]={owner:i,level:0};log(s,i,`${p.name} bought ${t.full} for ${fmt(t.p)}`);endTurn(s);return;}
+  log(s,i,`${p.name} passed on ${t.full}`);s.pending=null;if(!startAuction(s,t.i))endTurn(s);},
+ bid:(s,inc)=>{const a=s.auction,i=a.order[a.cur],p=s.players[i],amt=a.high+inc;if(p.cash<amt)return;a.high=amt;a.leader=i;log(s,i,`${p.name} bids ${fmt(amt)}`);nextBidder(s);},
+ fold:(s)=>{const a=s.auction,i=a.order[a.cur];a.folded.push(i);log(s,i,`${s.players[i].name} folds`);nextBidder(s);},
  study:(s,yes)=>{const p=s.players[s.turn];if(yes){p.cash-=40;p.degree=true;log(s,s.turn,`${p.name} went back to uni. −$40k`);s.pending={type:'job',options:pick2(JOBS.filter(j=>j.d),p.career),after:'end'};}else{log(s,s.turn,`${p.name} skipped uni`);endTurn(s);}},
- reno:(s,k)=>{const i=s.turn,p=s.players[i];if(k!=null){const t=T[k];p.cash-=t.p/2;s.owned[k].reno=true;log(s,i,`${p.name} renovated ${t.full}. −${fmt(t.p/2)}, rent doubled`);}else log(s,i,`${p.name} skipped the reno`);endTurn(s);},
- borrow:(s)=>{const p=s.players[s.turn];if(owes(p)||s.pending||s.trade)return;p.loan=50;p.cash+=50;log(s,s.turn,`${p.name} borrowed $50k from the Bank of Mum and Dad`);},
- repay:(s)=>{const p=s.players[s.turn];if(!owes(p)||p.cash<50)return;p.cash-=50;p.loan=0;p.happy+=3;log(s,s.turn,`${p.name} paid Mum and Dad back. They're proud. +3 joy`);},
- propose:(s,t)=>{if(s.pending||s.trade)return;s.trade=t;log(s,t.from,`${s.players[t.from].name} offered ${s.players[t.to].name} a trade`);},
+ reno:(s,k)=>{const i=s.turn,p=s.players[i];if(k!=null){const t=T[k],o=s.owned[k];p.cash-=buildCost(k);o.level=(o.level||0)+1;if(s.stats)s.stats[i].built++;log(s,i,`${p.name} renovated ${t.full}: now ${LVLNAME[o.level]} for ${fmt(buildCost(k))}`);}else log(s,i,`${p.name} skipped the reno`);endTurn(s);},
+ build:(s,k)=>{const i=s.turn,p=s.players[i],o=s.owned[k];if(!o||o.owner!==i||(o.level||0)>=3||!hasSet(s,i,T[k].g)||p.cash<buildCost(k))return;
+  p.cash-=buildCost(k);o.level=(o.level||0)+1;if(s.stats)s.stats[i].built++;log(s,i,`${p.name} built ${o.level===3?'a hotel':'a house'} in ${T[k].full} for ${fmt(buildCost(k))}`);},
+ target:(s,j)=>{const i=s.turn,p=s.players[i],q=s.players[j],pd=s.pending;
+  if(pd.act==='swapjob'){const c=p.career,sl=p.salary;p.career=q.career;p.salary=q.salary;q.career=c;q.salary=sl;log(s,i,`${p.name} swapped jobs with ${q.name} and is now ${an(p.career)} ${p.career.toLowerCase()}`);}
+  else{q.cash-=15;p.cash+=15;log(s,i,`${p.name} pinched $15k from ${q.name}`);}
+  endTurn(s);},
+ borrow:(s)=>{const p=s.players[s.turn];if(owes(p)||s.pending||s.trade||s.auction)return;const amt=s.rules.loan;p.loan=amt;p.cash+=amt;log(s,s.turn,`${p.name} borrowed ${fmt(amt)} from the Bank of Mum and Dad`);},
+ repay:(s)=>{const p=s.players[s.turn];if(!owes(p)||p.cash<owes(p))return;p.cash-=owes(p);p.loan=0;p.happy+=3;log(s,s.turn,`${p.name} paid Mum and Dad back. They're proud. +3 joy`);},
+ propose:(s,t)=>{if(s.pending||s.trade||s.auction)return;s.trade=t;log(s,t.from,`${s.players[t.from].name} offered ${s.players[t.to].name} a trade`);},
  tradeCancel:(s)=>{const t=s.trade;if(!t)return;s.trade=null;log(s,t.from,`${s.players[t.from].name} withdrew their offer`);},
  tradeAnswer:(s,yes)=>{const t=s.trade;if(!t)return;s.trade=null;const a=s.players[t.from],b=s.players[t.to];
   if(!yes){log(s,t.to,`${b.name} turned down ${a.name}'s offer`);return;}
   const ok=t.give.every(k=>s.owned[k]&&s.owned[k].owner===t.from)&&t.get.every(k=>s.owned[k]&&s.owned[k].owner===t.to)&&a.cash>=t.giveCash&&b.cash>=t.getCash;
   if(!ok){log(s,t.to,'That trade no longer adds up, so it was cancelled');return;}
+  const val=tradeValue(s,t),line=tradeLine(s,t);
   t.give.forEach(k=>s.owned[k].owner=t.to);t.get.forEach(k=>s.owned[k].owner=t.from);
   a.cash+=t.getCash-t.giveCash;b.cash+=t.giveCash-t.getCash;
-  log(s,t.to,`${b.name} accepted: ${tradeLine(s,t)}`);},
- reset:(s)=>{const keep=s.players.map(p=>({name:p.name,uid:p.uid,color:p.color}));Object.assign(s,fresh(),{laps:s.laps,players:keep.map(k=>Object.assign(newPlayer({players:[]},k.name,k.uid),{color:k.color}))});},
+  if(!s.bestTrade||val>s.bestTrade.v)s.bestTrade={v:val,text:line};
+  log(s,t.to,`${b.name} accepted: ${line}`);},
+ claim:(s,i,uid)=>{s.players[i].uid=uid;log(s,i,`${s.players[i].name} rejoined from another device`);},
+ timeout:(s,i)=>{log(s,i,`${s.players[i].name} ran out of time`);},
+ reset:(s)=>{const keep=s.players.map(p=>({name:p.name,uid:p.uid,color:p.color}));const r=s.rules;Object.assign(s,fresh(),{laps:s.laps,rules:r,players:keep.map(k=>Object.assign(newPlayer({players:[]},k.name,k.uid),{color:k.color}))});},
 };
 
 /* ---------- connection: the host's phone runs the game, guests connect peer-to-peer ---------- */
@@ -557,7 +670,7 @@ const EMO=['😂','🔥','😭','💸','👏','😤'];
 const PREFIX='hustlestreet-adl-';
 const ALPHA='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 let mode='home',S=fresh(),V=S,peer=null,conns=[],hostConn=null,code=null,gotState=false,busy=false,busyTimer=null,info=null,resetArm=false,lastReact=0,wake=null;
-let primed=false,seenSpin=0,seenCard=0,spinning=false,wheelDeg=0;
+let primed=false,seenSpin=0,seenCard=0,spinning=false,wheelDeg=0,ONLINE=[],clockOff=0,buildOpen=false;
 const ME=(()=>{const mk=()=>Math.random().toString(36).slice(2,12);try{let id=localStorage.getItem('hs-id');if(!id){id=mk();localStorage.setItem('hs-id',id);}return id;}catch(e){return mk();}})();
 const cur=()=>S;
 const isMine=p=>!!p&&p.uid===ME;
@@ -574,22 +687,34 @@ function allowed(s,from,name,args){const tp=s.players[s.turn];const seated=s.pla
   case 'join':return s.phase==='lobby'&&s.players.length<4&&typeof args[0]==='string'&&args[0].trim().length>0;
   case 'leave':return s.phase==='lobby'&&isInt(args[0],0,3)&&!!s.players[args[0]]&&s.players[args[0]].uid===from;
   case 'laps':return s.phase==='lobby'&&seated&&[2,3,4].includes(args[0]);
+  case 'rules':return s.phase==='lobby'&&seated&&Object.prototype.hasOwnProperty.call(RULE_OPTS,args[0])&&RULE_OPTS[args[0]].includes(args[1]);
+  case 'claim':{const seat=s.players[args[0]];return isInt(args[0],0,3)&&!!seat&&seat.uid!==from&&!onlineIds().includes(seat.uid)&&!s.players.some(p=>p.uid===from);}
+  case 'timeout':return from===ME&&s.phase==='play';
+  case 'bid':{const a=s.auction;if(s.phase!=='play'||!a||a.cur<0)return false;const bp=s.players[a.order[a.cur]];return !!bp&&bp.uid===from&&[10,25,50].includes(args[0])&&bp.cash>=a.high+args[0];}
+  case 'fold':{const a=s.auction;if(s.phase!=='play'||!a||a.cur<0)return false;const bp=s.players[a.order[a.cur]];return !!bp&&bp.uid===from;}
+  case 'build':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade&&!s.auction&&isInt(args[0],0,27)&&buildable(s,s.turn).includes(args[0])&&tp.cash>=buildCost(args[0]);
+  case 'target':return s.phase==='play'&&tp&&tp.uid===from&&!!s.pending&&s.pending.type==='target'&&s.pending.options.includes(args[0]);
   case 'start':return s.phase==='lobby'&&seated&&s.players.length>=2;
   case 'reset':return seated||from===ME;
   case 'tradeAnswer':return s.phase==='play'&&!!s.trade&&s.players[s.trade.to].uid===from;
   case 'tradeCancel':return s.phase==='play'&&!!s.trade&&s.players[s.trade.from].uid===from;
-  case 'spin':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade&&isInt(args[0],1,10);
-  case 'propose':{const t=args[0];if(!(s.phase==='play'&&tp&&tp.uid===from&&t&&typeof t==='object'))return false;
+  case 'spin':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade&&!s.auction&&isInt(args[0],1,10);
+  case 'propose':{const t=args[0];if(!(s.phase==='play'&&tp&&tp.uid===from&&t&&typeof t==='object'&&!s.auction&&!s.pending))return false;
    const n=s.players.length;return t.from===s.turn&&isInt(t.to,0,n-1)&&t.to!==t.from&&Array.isArray(t.give)&&Array.isArray(t.get)&&t.give.every(k=>isInt(k,0,27))&&t.get.every(k=>isInt(k,0,27))&&isInt(t.giveCash,0,1e6)&&isInt(t.getCash,0,1e6);}
   case 'path':case 'job':case 'buy':case 'study':case 'reno':return s.phase==='play'&&tp&&tp.uid===from&&!!s.pending&&s.pending.type===name;
-  case 'borrow':case 'repay':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade;
+  case 'borrow':case 'repay':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade&&!s.auction;
  }return false;}
 function apply(name,args,from){if(!A[name]||!allowed(S,from,name,args))return false;
  if(name==='join')args=[String(args[0]).trim().slice(0,14),from];
+ if(name==='claim')args=[args[0],from];
  if(name==='job'&&args[0]!=null&&!(S.pending.options||[]).includes(args[0]))return false;
  if(name==='reno'&&args[0]!=null&&!(S.pending.options||[]).includes(args[0]))return false;
- const s=structuredClone(S);A[name](s,...args);s.rev=(s.rev||0)+1;S=s;saveHost();broadcast();onState();return true;}
-function broadcast(){conns.forEach(c=>{if(c.open)try{c.send({type:'state',s:S});}catch(e){}});}
+ const s=structuredClone(S);A[name](s,...args);s.rev=(s.rev||0)+1;
+ s.deadline=(s.phase==='play'&&s.rules.timer)?Date.now()+(s.rules.timer+6)*1000:null;
+ S=s;saveHost();broadcast();onState();return true;}
+function onlineIds(){return mode==='host'?[ME,...conns.filter(c=>c.open&&c.metadata).map(c=>c.metadata.id)]:ONLINE;}
+const stateMsg=()=>({type:'state',s:S,online:onlineIds(),now:Date.now()});
+function broadcast(){const m=stateMsg();conns.forEach(c=>{if(c.open)try{c.send(m);}catch(e){}});}
 function act(name,...args){if(busy)return;
  if(mode==='host'){apply(name,args,ME);return;}
  if(mode!=='guest')return;
@@ -598,7 +723,8 @@ function act(name,...args){if(busy)return;
  clearTimeout(busyTimer);busyTimer=setTimeout(()=>{if(busy){busy=false;banner('That move didn’t reach the host. Try again.');render();}},6000);}
 const canAct=()=>{const s=S;if(mode==='home'||s.phase!=='play'||busy||spinning)return false;return isMine(s.players[s.turn]);};
 const canAnswer=()=>{const s=S;if(!s.trade||s.phase!=='play'||busy||spinning)return false;return isMine(s.players[s.trade.to]);};
-const canPropose=()=>{const s=S;return canAct()&&!s.pending&&!s.trade&&s.players.length>1;};
+const canPropose=()=>{const s=S;return canAct()&&!s.pending&&!s.trade&&!s.auction&&s.players.length>1;};
+const canBid=()=>{const s=S,a=s.auction;if(!a||a.cur<0||s.phase!=='play'||busy||spinning||mode==='home')return false;return isMine(s.players[a.order[a.cur]]);};
 
 /* ---------- sound: everything synthesised live with Web Audio ---------- */
 const SND={ctx:null,master:null,noise:null,on:(()=>{try{return localStorage.getItem('hs-sound')!=='off';}catch(e){return true;}})()};
@@ -637,7 +763,13 @@ const SFX={
   [523,659,784,1047].forEach(f=>tone(f,1.6,{type:'sawtooth',vol:.06,at:1.11,attack:.03,filter:['lowpass',1700]}));hiss(1.2,{vol:.08,freq:7000,q:.7,at:1.11});},
  click:()=>{tone(1500,.025,{type:'triangle',vol:.05});},
  ding:()=>{tone(1568,.55,{vol:.2});tone(3136,.3,{vol:.05});},
- payday:()=>{SFX.coin();setTimeout(()=>SFX.kaching(),120);}
+ payday:()=>{SFX.coin();setTimeout(()=>SFX.kaching(),120);},
+ gavel:()=>{[0,.17,.34].forEach(a=>{tone(240,.11,{type:'triangle',vol:.34,at:a,to:120});hiss(.06,{vol:.32,type:'lowpass',freq:900,at:a});});tone(150,.38,{vol:.55,at:.55,to:55});hiss(.14,{vol:.45,type:'lowpass',freq:700,at:.55});},
+ bid:()=>{tone(660,.07,{type:'square',vol:.08,filter:['lowpass',2400]});tone(990,.16,{type:'square',vol:.08,at:.07,filter:['lowpass',2400]});},
+ build:()=>{[0,.13,.26].forEach(a=>{tone(420,.06,{type:'square',vol:.12,at:a,filter:['lowpass',1500]});hiss(.05,{vol:.3,freq:2600,at:a,q:3});});setTimeout(()=>SFX.sparkle(),380);},
+ sneaky:()=>{[659,622,587,554,523].forEach((f,k)=>tone(f,.12,{type:'triangle',vol:.16,at:k*.11}));tone(392,.35,{type:'triangle',vol:.18,at:.6});tone(196,.35,{type:'sine',vol:.15,at:.6});},
+ jackpot:()=>{SFX.kaching();setTimeout(()=>SFX.kaching(),170);setTimeout(()=>SFX.coin(),340);setTimeout(()=>SFX.fanfare(),420);},
+ tock:hi=>{tone(hi?1480:1050,.06,{type:'triangle',vol:.16});hiss(.02,{vol:.1,freq:3000,q:2});}
 };
 function play(name,...a){try{if(SND.on&&SFX[name])SFX[name](...a);}catch(e){}}
 function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
@@ -661,8 +793,8 @@ function rain(){for(let k=0;k<6;k++)setTimeout(()=>burst(innerWidth*(.08+.17*k),
 const centerOf=el=>{const r=el.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2];};
 function floatText(el,text,cls,delay=0){if(!el)return;setTimeout(()=>{const r=el.getBoundingClientRect();if(!r.width)return;const f=document.createElement('div');f.className='ftxt '+cls;f.textContent=text;
  f.style.left=(r.left+r.width/2)+'px';f.style.top=(r.top+r.height/2)+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1800);},delay);}
-function turnFlash(s){const p=s.players[s.turn];if(!p||!isMine(p)||s.phase!=='play')return;const tf=$('turnflash');
- tf.innerHTML=`<div>${multi()?esc(p.name.toUpperCase())+'’S TURN':'YOUR TURN'}</div>`;tf.hidden=false;play('chime');buzz([30,40,30]);
+function turnFlash(s,label){const p=s.players[actorIdx(s)];if(!p||!isMine(p)||s.phase!=='play')return;const tf=$('turnflash');
+ tf.innerHTML=`<div>${label?(multi()?esc(p.name.toUpperCase())+': ':'')+label:multi()?esc(p.name.toUpperCase())+'’S TURN':'YOUR TURN'}</div>`;tf.hidden=false;play('chime');buzz([30,40,30]);
  clearTimeout(turnFlash.t);turnFlash.t=setTimeout(()=>{tf.hidden=true;tf.innerHTML='';},1700);}
 function stampTile(i){const el=tileEls[i];if(!el)return;const st=document.createElement('div');st.className='stamp';st.innerHTML='<b>SOLD</b>';el.appendChild(st);setTimeout(()=>st.remove(),1500);
  const hs=el.querySelector('.house');if(hs){hs.classList.remove('drop');void hs.offsetWidth;hs.classList.add('drop');}}
@@ -723,10 +855,14 @@ function effects(prev,next){
  if(next.phase==='lobby'){if(next.players.length>prev.players.length)play('pop');return;}
  if(next.phase!=='play'||next.players.length!==prev.players.length)return;
  let primary=null;
+ if(!prev.auction&&next.auction){primary='auction';floatText(tileEls[next.auction.tile],'AUCTION!','gold');sparkleTile(next.auction.tile);}
+ else if(prev.auction&&next.auction&&next.auction.high>prev.auction.high)primary='bid';
  for(const k in next.owned){const a=prev.owned[k],b=next.owned[k];
-  if(!a){stampTile(Number(k));primary=primary||'stamp';}
+  if(!a){stampTile(Number(k));primary=prev.auction?'sold':(primary||'stamp');}
   else if(a.owner!==b.owner){primary='swap';sparkleTile(Number(k));}
-  else if(!a.reno&&b.reno){primary=primary||'reno';sparkleTile(Number(k));}}
+  else if((b.level||0)>(a.level||0)){primary=primary||'build';sparkleTile(Number(k));floatText(tileEls[Number(k)],b.level===3?'HOTEL':'HOUSE','up');}}
+ if(next.rules&&next.rules.jackpot&&(next.pot||0)<(prev.pot||0))primary='jackpot';
+ if(prev.pending&&prev.pending.type==='target'&&!(next.pending&&next.pending.type==='target'))primary='sneaky';
  const rows=document.querySelectorAll('#score .srow');
  next.players.forEach((p,i)=>{const q=prev.players[i];if(!q)return;const row=rows[i];
   const dc=p.cash-q.cash,dj=p.happy-q.happy;
@@ -744,6 +880,12 @@ function effects(prev,next){
  const te=np?tileEls[np.pos]:null;const [x,y]=te?centerOf(te):[innerWidth/2,innerHeight/3];
  switch(primary){
   case 'stamp':play('stamp');buzz(30);setTimeout(()=>play('kaching'),260);break;
+  case 'auction':play('gavel');buzz([20,60,20]);break;
+  case 'bid':play('bid');break;
+  case 'sold':play('gavel');setTimeout(()=>play('stamp'),520);buzz([20,40,60]);break;
+  case 'build':play('build');buzz(20);break;
+  case 'sneaky':play('sneaky');break;
+  case 'jackpot':{play('jackpot');const [gx,gy]=centerOf(tileEls[19]);burst(gx,gy,70,{coins:true,power:12});setTimeout(()=>burst(gx,gy,50,{coins:true,power:10}),300);floatText(tileEls[19],'JACKPOT!','gold');buzz([40,40,40,40,120]);break;}
   case 'swap':play('swap');break;
   case 'reno':play('stamp');setTimeout(()=>play('sparkle'),220);break;
   case 'wedding':play('bells');burst(x,y,110,{power:12});setTimeout(()=>burst(x,y,60,{power:9}),400);break;
@@ -754,19 +896,22 @@ function effects(prev,next){
   case 'repaid':play('sparkle');break;
   case 'gain':play('kaching');burst(x,y,20,{coins:true,power:8});break;
   case 'loss':play('womp');break;}
- if(next.turn!==prev.turn&&isMine(next.players[next.turn]))setTimeout(()=>turnFlash(next),cardNew?2600:800);
+ const key=s=>s.auction&&s.auction.cur>=0?'a'+s.auction.cur+'|'+s.auction.high+'|'+s.auction.folded.length:s.trade?'t':'p'+s.turn;
+ const who=actorIdx(next);
+ if(key(next)!==key(prev)&&isMine(next.players[who])&&(next.auction||next.trade||next.turn!==prev.turn))
+  setTimeout(()=>turnFlash(next,next.auction?'YOUR BID':next.trade?'TRADE OFFER':null),cardNew?2600:(next.auction?300:800));
 }
 function countUp(el,from,to){if(reduceMotion()||!el){return;}const t0=performance.now(),dur=750;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
  const f=now=>{const t=Math.min(1,(now-t0)/dur);const e=1-Math.pow(1-t,3);if(!el.isConnected)return;el.textContent=fmt(from+(to-from)*e);if(t<1)requestAnimationFrame(f);};requestAnimationFrame(f);}
 
 function hostRoom(c,saved,tries=0){if(peer)try{peer.destroy();}catch(e){}
- code=c;S=saved||fresh();mode='host';gotState=true;conns=[];primed=false;setHash(code);saveHost();onState();
+ code=c;S=saved?normalize(saved):fresh();mode='host';gotState=true;conns=[];primed=false;setHash(code);saveHost();onState();
  peer=new Peer(PREFIX+code,{debug:0});
  peer.on('open',()=>{banner('');render();});
  peer.on('connection',conn=>{conns.push(conn);
-  conn.on('open',()=>{try{conn.send({type:'state',s:S});}catch(e){}render();});
+  conn.on('open',()=>{broadcast();render();});
   conn.on('data',d=>onHostData(conn,d));
-  const gone=()=>{conns=conns.filter(x=>x!==conn);render();};conn.on('close',gone);conn.on('error',gone);});
+  const gone=()=>{conns=conns.filter(x=>x!==conn);broadcast();render();};conn.on('close',gone);conn.on('error',gone);});
  peer.on('disconnected',()=>{if(mode==='host')setTimeout(()=>{try{if(peer&&!peer.destroyed)peer.reconnect();}catch(e){}},2000);});
  peer.on('error',err=>{
   if(err.type==='unavailable-id'){if(saved&&tries<6){banner('Reopening your room…');setTimeout(()=>hostRoom(c,saved,tries+1),3000);}
@@ -774,7 +919,7 @@ function hostRoom(c,saved,tries=0){if(peer)try{peer.destroy();}catch(e){}
   if(['network','server-error','socket-error','socket-closed'].includes(err.type))banner('Can’t reach the matchmaking server. Check your internet; it will retry.');
  });}
 function onHostData(conn,d){if(!d||typeof d!=='object')return;const from=conn.metadata&&typeof conn.metadata.id==='string'?conn.metadata.id:null;if(!from)return;
- if(d.type==='act'&&typeof d.name==='string'){if(!apply(d.name,Array.isArray(d.args)?d.args:[],from)){try{conn.send({type:'state',s:S});}catch(e){}}}
+ if(d.type==='act'&&typeof d.name==='string'&&d.name!=='timeout'){if(!apply(d.name,Array.isArray(d.args)?d.args:[],from)){try{conn.send(stateMsg());}catch(e){}}}
  else if(d.type==='react'&&isInt(d.e,0,EMO.length-1)){showReact(d.e,from);conns.forEach(c=>{if(c!==conn&&c.open)try{c.send({type:'react',e:d.e,from});}catch(e){}});}}
 function joinRoom(c){if(peer)try{peer.destroy();}catch(e){}
  code=c;mode='guest';S=fresh();V=S;gotState=false;primed=false;setHash(code);render();
@@ -788,7 +933,7 @@ function connectHost(){if(mode!=='guest'||!peer||peer.destroyed)return;
  const c=peer.connect(PREFIX+code,{reliable:true,metadata:{id:ME}});hostConn=c;
  c.on('open',()=>{banner('');});
  c.on('data',d=>{if(!d||typeof d!=='object')return;
-  if(d.type==='state'&&d.s&&Array.isArray(d.s.players)){S=d.s;gotState=true;busy=false;clearTimeout(busyTimer);onState();}
+  if(d.type==='state'&&d.s&&Array.isArray(d.s.players)){S=normalize(d.s);ONLINE=Array.isArray(d.online)?d.online:[];if(typeof d.now==='number')clockOff=d.now-Date.now();gotState=true;busy=false;clearTimeout(busyTimer);onState();}
   else if(d.type==='react'&&isInt(d.e,0,EMO.length-1))showReact(d.e,d.from);});
  c.on('close',()=>{if(mode==='guest'&&hostConn===c){banner('Lost the host. Reconnecting…');setTimeout(connectHost,3000);}});}
 function leaveRoom(){try{peer&&peer.destroy();}catch(e){}peer=null;conns=[];hostConn=null;mode='home';code=null;S=fresh();V=S;gotState=false;busy=false;spinning=false;primed=false;setHash('');banner('');closeTrade();closeOverlay();render();}
@@ -796,13 +941,29 @@ async function keepAwake(){try{if(navigator.wakeLock&&!wake&&document.visibility
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){keepAwake();if(peer&&peer.disconnected&&!peer.destroyed)try{peer.reconnect();}catch(e){}if(mode==='guest'&&(!hostConn||!hostConn.open))connectHost();}});
 document.addEventListener('click',keepAwake,{passive:true});
 
+/* ---------- turn timer: everyone sees the countdown, the host plays a safe move when it runs out ---------- */
+function actorIdx(s){if(s.auction&&s.auction.cur>=0)return s.auction.order[s.auction.cur];if(s.trade)return s.trade.to;return s.turn;}
+let lastTickSec=null;
+function timerLeft(){if(!S.deadline||!S.rules||!S.rules.timer||S.phase!=='play')return null;const now=Date.now()+(mode==='host'?0:clockOff);return Math.max(0,Math.min(S.rules.timer,Math.ceil((S.deadline-now)/1000)));}
+function tickTimer(){const el=$('tmr');const left=timerLeft();
+ if(el){el.hidden=left==null;if(left!=null){el.querySelector('b').textContent=left;el.classList.toggle('low',left<=10);}}
+ if(left!=null&&left<=5&&left>0&&left!==lastTickSec&&isMine(S.players[actorIdx(S)])&&!spinning){play('tock',left<=2);buzz(15);}
+ lastTickSec=left;
+ if(mode==='host'&&S.phase==='play'&&S.rules.timer&&S.deadline&&Date.now()>S.deadline&&!busy)autoAct();}
+function autoAct(){const s=S,i=actorIdx(s),p=s.players[i];if(!p)return;const pd=s.pending;let a=null;
+ if(s.auction)a=['fold'];else if(s.trade)a=['tradeAnswer',false];
+ else if(pd)a={path:['path','work'],job:['job',pd.options&&pd.options[0]],buy:['buy',false],study:['study',false],reno:['reno',null],target:['target',pd.options&&pd.options[0]]}[pd.type];
+ else a=['spin',1+rnd(10)];
+ if(!a)return;apply('timeout',[i],ME);apply(a[0],a.slice(1),p.uid);}
+setInterval(tickTimer,250);
+
 /* ---------- trade builder (local until sent) ---------- */
 let tradeOpen=false,tradeTo=null;
 function openTrade(){const s=S;if(!canPropose())return;tradeOpen=true;
  if(tradeTo==null||tradeTo===s.turn||!s.players[tradeTo])tradeTo=s.players.findIndex((p,i)=>i!==s.turn);buildTrade();}
 function closeTrade(){tradeOpen=false;$('tradeBox').hidden=true;$('tradeBox').innerHTML='';}
 function buildTrade(){const s=S,me=s.turn,them=tradeTo,a=s.players[me],b=s.players[them];
- const box=(ks,pre)=>ks.length?ks.map(k=>`<label class="ck" for="${pre}${k}"><input type="checkbox" id="${pre}${k}" data-k="${k}"><span class="sw" style="background:${GCOL[T[k].g]}"></span>${esc(T[k].full)}${s.owned[k].reno?' ★':''}</label>`).join(''):'<span class="hint">No suburbs</span>';
+ const box=(ks,pre)=>ks.length?ks.map(k=>`<label class="ck" for="${pre}${k}"><input type="checkbox" id="${pre}${k}" data-k="${k}"><span class="sw" style="background:${GCOL[T[k].g]}"></span>${esc(T[k].full)}${lvlTag(s.owned[k].level)}</label>`).join(''):'<span class="hint">No suburbs</span>';
  $('tradeBox').innerHTML=`<h2 class="h">Propose a trade</h2>
   <div class="lapsrow"><label for="tr-to">Trade with</label>
    <select class="inp" id="tr-to">${s.players.map((p,i)=>i===me?'':`<option value="${i}"${i===them?' selected':''}>${esc(p.name)}</option>`).join('')}</select></div>
@@ -832,12 +993,13 @@ function buildBoard(){
  let h='';
  T.forEach(t=>{const [r,c]=pos2cell(t.i);
   const body=t.k==='prop'
-   ?`<div class="band" style="background:${GCOL[t.g]}"><span class="house" hidden></span></div><div class="nm${t.n.length>9&&!t.n.includes('\n')?' long':''}">${esc(t.n)}</div><div class="pr">$${t.p}K</div>`
+   ?`<div class="band" style="background:${GCOL[t.g]}"><span class="lvl"></span><span class="house" hidden></span></div><div class="nm${t.n.length>9&&!t.n.includes('\n')?' long':''}">${esc(t.n)}</div><div class="pr">$${t.p}K</div>`
    :`<div class="sp">${svg(KIND[t.k].i,24)}<div class="lb">${KIND[t.k].l}</div></div>`;
   h+=`<div class="tile k-${t.k}${t.c?' corner':''}" style="grid-row:${r};grid-column:${c}" data-tile="${t.i}" role="button" tabindex="0" aria-label="${esc(t.full)}">${body}<div class="toks"></div></div>`;});
  h+=`<div class="center">
    <div class="minisign"><div>HUSTLE <span class="y">ST</span></div></div>
    <div class="score" id="score"></div>
+   <div class="pot" id="pot" hidden>${svg('coin',15,2.6)}<span>Jackpot</span><b id="potAmt">$0k</b></div>
    <div class="wheelwrap"><div class="wheelbase"></div><div class="ptr"></div><div class="wheel" id="wheel">${Array.from({length:10},(_,j)=>`<span style="--a:${segAngle(j+1)}deg">${j+1}</span>`).join('')}</div><div class="hub" id="hub">–</div></div>
    <div class="ticker" id="ticker"></div></div>`;
  $('board').innerHTML=h;
@@ -858,9 +1020,14 @@ function render(){const s=V,home=mode==='home';
  if(home){$('lobby').hidden=$('game').hidden=$('over').hidden=true;const sv=loadHost();$('resumeBtn').hidden=!sv;
   if(sv)$('resumeBtn').innerHTML=`Resume room ${esc(sv.code)}<small>${sv.s.phase==='play'?'Game in progress':sv.s.phase==='over'?'Game finished':'Lobby'} · ${sv.s.players.map(p=>esc(p.name)).join(', ')||'no players yet'}</small>`;return;}
  $('lobby').hidden=s.phase!=='lobby';$('game').hidden=s.phase!=='play';$('over').hidden=s.phase!=='over';
+ renderRejoin(s);
  if(s.phase!=='over')overAnimated=false;
  if(s.phase==='lobby')renderLobby(s);else if(s.phase==='play')renderGame(s);else renderOver(s);}
 
+function renderRejoin(s){const box=$('rejoin');const away=s.players.map((p,i)=>({p,i})).filter(x=>!onlineIds().includes(x.p.uid));
+ const show=mode==='guest'&&gotState&&!s.players.some(isMine)&&away.length>0;box.hidden=!show;if(!show){box.innerHTML='';return;}
+ box.innerHTML=`<h2 class="h sm">Already playing? Grab your seat</h2><p class="hint">If your phone died or you switched devices, tap your name to pick up where you left off.</p>
+  <div class="stack">${away.map(x=>`<button class="btn c" data-claim="${x.i}">${pawnHTML(PCOL[x.p.color],'mini')}I'm ${esc(x.p.name)}</button>`).join('')}</div>`;}
 function renderLobby(s){
  const ready=mode==='host'||gotState;
  $('lobbyCode').textContent=code||'';
@@ -876,23 +1043,27 @@ function renderLobby(s){
  $('name').placeholder=mineN?'Add another name':'Your name';
  const full=s.players.length>=4;$('joinBtn').disabled=full||busy||!ready;$('name').disabled=full||!ready;
  $('laps').value=String(s.laps);$('laps').disabled=busy||!ready||!mineN;
+ for(const k in RULE_OPTS){const el=$('r-'+k);if(!el)continue;el.value=String(s.rules[k]);el.disabled=busy||!ready||!mineN;}
  $('startBtn').disabled=s.players.length<2||busy||!mineN;
  $('startBtn').textContent=s.players.length<2?'Need 2+ players':'Start game';
 }
 
 function renderGame(s){
  if(tradeOpen&&!canPropose())closeTrade();
+ if(buildOpen&&(!canAct()||s.pending||s.auction))buildOpen=false;
  const curP=s.players[s.turn];
  T.forEach(t=>{const el=tileEls[t.i];const o=s.owned[t.i];
   el.classList.toggle('owned',!!o);
   if(o)el.style.setProperty('--oc',PCOL[s.players[o.owner].color]);
   const hs=el.querySelector('.house');
-  if(hs){hs.hidden=!o;if(o){hs.style.setProperty('--hc',PCOL[s.players[o.owner].color]);hs.classList.toggle('reno',!!o.reno);}}
+  if(hs){hs.hidden=!o;if(o)hs.style.setProperty('--hc',PCOL[s.players[o.owner].color]);}
+  const lv=el.querySelector('.lvl');if(lv){const n=o?(o.level||0):0;const want=n===3?'<i class="h"></i>':'<i></i>'.repeat(n);if(lv.innerHTML!==want)lv.innerHTML=want;}
   const here=s.players.map((p,j)=>({p,j})).filter(x=>x.p.pos===t.i&&!x.p.retired&&x.j!==hideMover).sort((a,b)=>(a.j===s.turn)-(b.j===s.turn)).reverse();
   el.querySelector('.toks').innerHTML=here.map(x=>pawnHTML(PCOL[x.p.color],'')).join('');
   el.classList.toggle('here',!spinning&&!!curP&&!curP.retired&&curP.pos===t.i);});
- $('score').innerHTML=s.players.map((p,i)=>`<div class="srow${i===s.turn?' now':''}${p.retired?' out':''}">${pawnHTML(PCOL[p.color],'')}<div class="who"><span class="n">${esc(p.name)}${isMine(p)&&!multi()?' (you)':''}</span><span class="j">${p.retired?'Retired':p.career?esc(p.career):'No job yet'}${p.skip?' · gap year':''}</span></div><span class="c${p.cash<0?' neg':''}">${fmt(p.cash)}</span></div>`).join('');
+ $('score').innerHTML=s.players.map((p,i)=>`<div class="srow${i===s.turn?' now':''}${p.retired?' out':''}">${pawnHTML(PCOL[p.color],'')}<div class="who"><span class="n">${esc(p.name)}${isMine(p)&&!multi()?' (you)':''}</span><span class="j">${p.retired?'Retired':p.career?esc(p.career):'No job yet'}${p.skip?' · gap year':''}${onlineIds().includes(p.uid)?'':' · away'}</span></div><span class="c${p.cash<0?' neg':''}">${fmt(p.cash)}</span></div>`).join('');
  $('hub').textContent=spinning?(spinShown??'?'):(s.lastSpin??'–');
+ $('pot').hidden=!s.rules.jackpot;$('potAmt').textContent=fmt(s.pot||0);
  const last=s.log[0]?esc(s.log[0].t).replace(/(−?\$\d+k)/g,'<b>$1</b>'):'';
  $('ticker').innerHTML=info!=null?infoText(s,info):`<span>${last}</span>`;
  const cs=document.querySelectorAll('#score .srow .c');
@@ -902,14 +1073,24 @@ function renderGame(s){
   return `<div class="pc"><div class="tp">${pawnHTML(PCOL[p.color],'')}<span class="nm">${pname(p)}</span><span class="cash${p.cash<0?' neg':''}">${fmt(p.cash)}</span></div>
    <div class="status">${p.career?`${esc(p.career)} · ${fmt(p.salary)} a lap`:'No job yet'}${p.degree?' · degree':''}${p.partner?' · married':''}${p.retired?' · retired':''}${p.skip?' · gap year':''}${owes(p)?' · owes Mum and Dad $50k':''}</div>
    <div class="stats"><div><span>Joy</span><b>${p.happy}</b></div><div><span>Kids</span><b>${p.kids}</b></div><div><span>Laps</span><b>${p.laps}/${s.laps}</b></div><div><span>Worth</span><b>${fmt(w.total)}</b></div></div>
-   ${ps.length?`<div class="chips">${ps.map(k=>`<span class="chip" style="background:${GCOL[T[k].g]}">${esc(T[k].full)}${s.owned[k].reno?' ★':''}</span>`).join('')}</div>`:''}</div>`}).join('');
+   ${ps.length?`<div class="chips">${ps.map(k=>`<span class="chip" style="background:${GCOL[T[k].g]}">${esc(T[k].full)}${lvlTag(s.owned[k].level)}</span>`).join('')}</div>`:''}</div>`}).join('');
  $('log').innerHTML=s.log.map(e=>`<li><span class="dot" style="background:${e.c==null?'#fff':PCOL[e.c]}"></span><span>${esc(e.t)}</span></li>`).join('');
 }
 function infoText(s,i){const t=T[i];if(t.k!=='prop')return `<span><b>${esc(t.full)}</b> · ${esc(KIND[t.k].d)}</span>`;const o=s.owned[i];
- return `<span><b>${esc(t.full)}</b> · ${fmt(t.p)}, rent ${fmt(t.r)}${o?` · owned by ${esc(s.players[o.owner].name)}, rent now ${fmt(rentOf(s,i))}`:' · for sale'}</span>`;}
+ return `<span><b>${esc(t.full)}</b> · ${fmt(t.p)}, rent ${fmt(t.r)}${o?` · ${esc(s.players[o.owner].name)}'s${o.level?' with '+LVLNAME[o.level]:''}, rent now ${fmt(rentOf(s,i))}`:' · for sale'}</span>`;}
 
+const tmrHTML=()=>S.rules&&S.rules.timer?`<span class="tmr" id="tmr" hidden>${svg('clock',15,2.6)}<b></b></span>`:'';
+function lvlTag(l){return l===3?' · hotel':l?` · ${l}h`:'';}
 function dockHTML(s){const p=s.players[s.turn],pd=s.pending,who=esc(p.name),mine=canAct();
  if(spinning)return `<div class="waiting">${pawnHTML(PCOL[p.color],'')}<div><div class="h sm">${who} is spinning…</div></div></div>`;
+ if(s.auction&&s.auction.cur>=0){const a=s.auction,t=T[a.tile],bi=a.order[a.cur],b=s.players[bi],lead=a.leader!=null?s.players[a.leader]:null;
+  const head=`<div class="auc" style="--g:${GCOL[t.g]}"><div class="auc-l"><span class="sub">Going to auction</span><span class="h">${esc(t.full)}</span><span class="hint">List price ${fmt(t.p)} · rent ${fmt(t.r)}</span></div>
+   <div class="auc-r"><span class="sub">${lead?esc(lead.name)+' leads':'No bids yet'}</span><span class="auc-amt${lead?'':' none'}">${fmt(a.high)}</span></div></div>
+   <div class="bidders">${a.order.map(i=>{const q=s.players[i];return `<span class="bidder${a.folded.includes(i)?' out':''}${i===bi?' now':''}${i===a.leader?' lead':''}" style="--c:${PCOL[q.color]}">${esc(q.name)}</span>`}).join('')}</div>`;
+  if(canBid())return `<div class="dockhead"><span class="h">${multi()?esc(b.name)+', your bid':'Your bid'}</span>${tmrHTML()}</div>${head}
+   <div class="row3">${[10,25,50].map(n=>`<button class="big" data-bid="${n}"${b.cash<a.high+n?' disabled':''}>+$${n}k</button>`).join('')}</div>
+   <button class="btn c" data-fold="1">Fold</button><p class="hint">${esc(b.name)} has ${fmt(b.cash)}. The highest bid wins once everyone else folds.</p>`;
+  return `<div class="waiting">${pawnHTML(PCOL[b.color],'')}<div><div class="h sm">${esc(b.name)} is bidding…</div></div>${tmrHTML()}</div>${head}`;}
  if(s.trade){const t=s.trade,a=s.players[t.from],b=s.players[t.to];
   const offer=`<dl class="offer"><dt>${esc(a.name)} gives</dt><dd>${esc(listNames(t.give,t.giveCash))}</dd><dt>${esc(b.name)} gives</dt><dd>${esc(listNames(t.get,t.getCash))}</dd></dl>`;
   const both=isMine(a)&&isMine(b);
@@ -917,12 +1098,17 @@ function dockHTML(s){const p=s.players[s.turn],pd=s.pending,who=esc(p.name),mine
   if(isMine(a))return `<h2 class="h">Offer sent to ${esc(b.name)}</h2>${offer}<button class="btn c" data-t="cancel">Withdraw offer</button>`;
   return `<div class="waiting">${pawnHTML(PCOL[a.color],'')}<div><div class="h sm">${esc(a.name)} offered ${esc(b.name)} a trade</div></div></div>${offer}`;}
  if(!mine){if(busy)return `<div class="h sm">Sending…</div>`;
-  const what=!pd?'Waiting for them to spin':pd.type==='buy'?`Deciding on ${esc(T[pd.tile].full)}`:({path:'Choosing uni or work',job:'Picking a job',study:'Deciding on uni',reno:'Choosing a reno'}[pd.type]||'Deciding');
-  return `<div class="waiting">${pawnHTML(PCOL[p.color],'')}<div><div class="h sm">${who}’s turn</div><div class="sub">${what}</div></div></div>`;}
- const head=`<div class="dockhead"><span class="h">${!multi()?'Your turn, '+who:who+'’s turn'}</span><span class="sub">${p.career?esc(p.career)+' · '+fmt(p.salary)+' a lap':'No job yet'}</span></div>`;
- if(!pd)return head+`<button class="big" id="spinBtn">Spin</button>
-  <div class="row2"><button class="btn c" data-t="open"${s.players.length<2?' disabled':''}>${svg('swap',17,2.6)}Trade</button>${owes(p)?`<button class="btn c" data-a="repay"${p.cash<50?' disabled':''}>${svg('house',17,2.6)}Repay $50k</button>`:`<button class="btn c" data-a="borrow">${svg('house',17,2.6)}Mum &amp; Dad</button>`}</div>
-  <p class="hint">${owes(p)?'You owe Mum and Dad $50k. Paying it back earns 3 joy.':'Mum and Dad will lend you $50k, but you lose 2 joy each Payday until it’s paid back.'}</p>`;
+  const what=!pd?'Waiting for them to spin':pd.type==='buy'?`Deciding on ${esc(T[pd.tile].full)}`:({path:'Choosing uni or work',job:'Picking a job',study:'Deciding on uni',reno:'Choosing where to build',target:'Picking a target…'}[pd.type]||'Deciding');
+  return `<div class="waiting">${pawnHTML(PCOL[p.color],'')}<div><div class="h sm">${who}’s turn</div><div class="sub">${what}</div></div>${tmrHTML()}</div>`;}
+ const head=`<div class="dockhead"><span class="h">${!multi()?'Your turn, '+who:who+'’s turn'}</span><span class="sub">${p.career?esc(p.career)+' · '+fmt(p.salary)+' a lap':'No job yet'}</span>${tmrHTML()}</div>`;
+ if(!pd&&buildOpen){const ks=buildable(s,s.turn);
+  return head+`<h2 class="h sm">Build on your sets</h2>${ks.length?`<div class="stack">${ks.map(k=>{const o=s.owned[k],nl=(o.level||0)+1,t=T[k];
+   return `<button class="btn" data-build="${k}"${p.cash<buildCost(k)?' disabled':''}><span style="display:flex;align-items:center;gap:8px"><span class="sw" style="background:${GCOL[t.g]}"></span>${esc(t.full)} → ${nl===3?'hotel':nl+(nl>1?' houses':' house')}</span><small>Costs ${fmt(buildCost(k))} · rent goes ${fmt(rentOf(s,k))} → ${fmt(t.r*LVL[nl])}</small></button>`}).join('')}</div>`:'<p class="hint">Own both suburbs of a colour to build on them.</p>'}
+   <button class="big" data-t="buildDone" style="font-size:20px">Done</button>`;}
+ if(!pd){const canBuild=buildable(s,s.turn).length>0;const loan=s.rules.loan;
+  return head+`<button class="big" id="spinBtn">Spin</button>
+  <div class="row3"><button class="btn c" data-t="open"${s.players.length<2?' disabled':''}>${svg('swap',17,2.6)}Trade</button><button class="btn c" data-t="build"${canBuild?'':' disabled'}>${svg('hammer',17,2.6)}Build</button>${owes(p)?`<button class="btn c" data-a="repay"${p.cash<owes(p)?' disabled':''}>${svg('house',17,2.6)}Repay</button>`:`<button class="btn c" data-a="borrow">${svg('house',17,2.6)}Mum&amp;Dad</button>`}</div>
+  <p class="hint">${owes(p)?`You owe Mum and Dad ${fmt(owes(p))}. Paying it back earns 3 joy.`:`Mum and Dad will lend you ${fmt(loan)}, but you lose 2 joy each Payday until it’s paid back.`}${canBuild?' You own a full set, so you can build houses.':''}</p>`;}
  if(pd.type==='path')return `<h2 class="h">${who}, pick your path</h2><div class="stack">
   <button class="btn pick" data-a="path" data-v="uni">Go to uni<small>Pay $40k now, choose from jobs paying $38k–$68k</small></button>
   <button class="btn" data-a="path" data-v="work">Start working<small>Free, choose from jobs paying $18k–$34k</small></button></div>`;
@@ -930,17 +1116,33 @@ function dockHTML(s){const p=s.players[s.turn],pd=s.pending,who=esc(p.name),mine
   ${p.career?`<button class="btn" data-a="job" data-v="">Keep being ${an(p.career)} ${esc(p.career.toLowerCase())}<small>${fmt(p.salary)} every Payday</small></button>`:''}</div>`;
  if(pd.type==='buy'){const t=T[pd.tile];const mate=T.find(x=>x.g===t.g&&x.i!==t.i);
   return `<div class="deed"><div class="dh" style="background:${GCOL[t.g]}"><small>TITLE DEED</small><div>${esc(t.full.toUpperCase())}</div></div>
-   <dl><dt>Rent</dt><dd>${fmt(t.r)}</dd><dt>With ${esc(mate.full)}</dt><dd>${fmt(t.r*2)}</dd><dt>Renovated</dt><dd>${fmt(t.r*2)}</dd><dt>Renovated, both owned</dt><dd>${fmt(t.r*4)}</dd></dl>
-   <dl><dt>Reno costs</dt><dd>${fmt(t.p/2)}</dd><dt>Worth at the end</dt><dd>${fmt(t.p)} · ${fmt(t.p*1.5)} renovated</dd></dl></div>
+   <dl><dt>Rent</dt><dd>${fmt(t.r)}</dd><dt>With ${esc(mate.full)} too</dt><dd>${fmt(t.r*2)}</dd><dt>With 1 house</dt><dd>${fmt(t.r*3)}</dd><dt>With 2 houses</dt><dd>${fmt(t.r*5)}</dd><dt>With a hotel</dt><dd>${fmt(t.r*8)}</dd></dl>
+   <dl><dt>Each house or hotel</dt><dd>${fmt(t.p/2)}</dd><dt>Worth at the end</dt><dd>${fmt(t.p)} + ${fmt(t.p/2)} per building</dd></dl></div>
    <div class="sub" style="text-align:center">${who} has ${fmt(p.cash)}</div>
-   <button class="big" data-a="buy" data-v="1">Buy for ${fmt(t.p)}</button><button class="btn c" data-a="buy" data-v="">Pass</button>`;}
+   <button class="big" data-a="buy" data-v="1">Buy for ${fmt(t.p)}</button><button class="btn c" data-a="buy" data-v="">${s.rules.auctions?'Pass and send to auction':'Pass'}</button>`;}
+ if(pd.type==='target'){const swap=pd.act==='swapjob';return `<h2 class="h">${swap?'Swap jobs with…':'Pinch $15k from…'}</h2><div class="stack">${pd.options.map(j=>{const q=s.players[j];
+   return `<button class="btn" data-target="${j}"><span style="display:flex;align-items:center;gap:8px">${pawnHTML(PCOL[q.color],'mini')}${esc(q.name)}</span><small>${swap?`${esc(q.career)} · ${fmt(q.salary)} a lap`:`Has ${fmt(q.cash)}`}</small></button>`}).join('')}</div>`;}
  if(pd.type==='study')return `<h2 class="h">Go back to uni?</h2><p class="hint">Pay $40k for a degree, then pick from two degree jobs.</p>
   <div class="row2"><button class="big" data-a="study" data-v="1" style="font-size:19px">Study −$40k</button><button class="btn c" data-a="study" data-v="">Skip</button></div>`;
- if(pd.type==='reno')return `<h2 class="h">Renovate a suburb?</h2><p class="hint">Pay half its price. Rent doubles and it's worth 1.5× at the end.</p><div class="stack">
-  ${pd.options.map(k=>`<button class="btn" data-a="reno" data-v="${k}">${esc(T[k].full)}<small>Costs ${fmt(T[k].p/2)}</small></button>`).join('')}
+ if(pd.type==='reno')return `<h2 class="h">Free building permit</h2><p class="hint">Add a house to any suburb you own, no full set needed. It costs half the suburb's price.</p><div class="stack">
+  ${pd.options.map(k=>{const nl=(s.owned[k].level||0)+1;return `<button class="btn" data-a="reno" data-v="${k}">${esc(T[k].full)} → ${nl===3?'hotel':nl+(nl>1?' houses':' house')}<small>Costs ${fmt(buildCost(k))} · rent becomes ${fmt(T[k].r*LVL[nl])}</small></button>`}).join('')}
   <button class="btn c" data-a="reno" data-v="">Skip</button></div>`;
  return '';}
 
+function awards(s){const out=[],P=s.players,st=i=>stat(s,i);
+ const best=(f,min)=>{let bi=-1,bv=-Infinity;P.forEach((p,i)=>{const v=f(st(i));if(v!=null&&v>bv){bv=v;bi=i;}});return bi>=0&&bv>(min==null?-Infinity:min)?[bi,bv]:null;};
+ let a=best(x=>x.spins?x.spinSum/x.spins:null);if(a)out.push(['trophy','Luckiest spinner',a[0],`Averaged ${a[1].toFixed(1)} a spin`]);
+ a=best(x=>x.spins?-(x.spinSum/x.spins):null);if(a&&P.length>1)out.push(['drop','Cursed wheel',a[0],`Averaged ${(-a[1]).toFixed(1)} a spin`]);
+ a=best(x=>x.rentIn,0);if(a)out.push(['house','Landlord',a[0],`Collected ${fmt(a[1])} in rent`]);
+ a=best(x=>x.rentOut,0);if(a)out.push(['tax','Rent victim',a[0],`Paid ${fmt(a[1])} in rent`]);
+ a=best(x=>x.auctions,0);if(a)out.push(['hammer','Auction king',a[0],`Won ${a[1]} auction${a[1]>1?'s':''}`]);
+ a=best(x=>x.built,0);if(a)out.push(['up','Developer',a[0],`Put up ${a[1]} building${a[1]>1?'s':''}`]);
+ a=best(x=>x.cards,0);if(a)out.push(['card','Card shark',a[0],`Drew ${a[1]} Life card${a[1]>1?'s':''}`]);
+ if(s.bestTrade)out.push(['swap','Deal of the game',null,s.bestTrade.text]);
+ return out;}
+function awardsHTML(s){const list=awards(s);if(!list.length)return '';
+ return `<h2 class="sectitle">Awards</h2><div class="awards">${list.map(([ic,t,who,d],k)=>{const p=who!=null?s.players[who]:null;
+  return `<div class="award" style="--c:${p?PCOL[p.color]:'#FFC53D'};animation-delay:${1.2+k*.12}s"><div class="aw-ic">${svg(ic,22,2.4)}</div><div class="aw-t">${esc(t)}</div>${p?`<div class="aw-who">${esc(p.name)}</div>`:''}<div class="aw-d">${esc(d)}</div></div>`}).join('')}</div>`;}
 function renderOver(s){const rows=s.players.map((p,i)=>({p,w:worth(s,i)})).sort((a,b)=>b.w.total-a.w.total);
  const top=rows.slice(0,3);const order=top.length===3?[top[1],top[0],top[2]]:top.length===2?[top[1],top[0]]:top;
  const hts={0:128,1:92,2:66};
@@ -948,9 +1150,11 @@ function renderOver(s){const rows=s.players.map((p,i)=>({p,w:worth(s,i)})).sort(
  $('over').innerHTML=`<div class="over-head"><div class="sub">Everyone has retired</div><div class="h">${esc(rows[0].p.name)} retires<br><span>the richest</span></div></div>
   <div class="podium" style="grid-template-columns:repeat(${order.length},minmax(0,1fr))">${order.map(r=>{const place=rows.indexOf(r);
    return `<div class="pod">${pawnHTML(PCOL[r.p.color],'')}<span class="nm">${esc(r.p.name)}</span><span class="tt">${fmt(r.w.total)}</span><div class="blk${overAnimated?'':' rise'}" style="height:${hts[place]}px;box-shadow:inset 0 -6px 0 ${PCOL[r.p.color]};animation-delay:${(2-place)*.35}s">${place+1}</div></div>`}).join('')}</div>
-  <div class="tbl"><table><thead><tr><th>Player</th><th>Cash</th><th>Suburbs</th><th>Joy</th><th>Owed</th><th>Total</th></tr></thead><tbody>
-  ${rows.map(r=>`<tr><td><b>${esc(r.p.name)}</b></td><td>${fmt(r.w.cash)}</td><td>${fmt(r.w.prop)}</td><td>${fmt(r.w.joy)}</td><td class="owed">${r.w.owed?fmt(-r.w.owed):'–'}</td><td><b>${fmt(r.w.total)}</b></td></tr>`).join('')}
+  <div class="tbl"><table><thead><tr><th>Player</th><th>Cash</th><th>Suburbs</th><th>Joy</th><th>Family</th><th>Owed</th><th>Total</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td><b>${esc(r.p.name)}</b></td><td>${fmt(r.w.cash)}</td><td>${fmt(r.w.prop)}</td><td>${fmt(r.w.joy)}</td><td>${r.w.fam?fmt(r.w.fam):'–'}</td><td class="owed">${r.w.owed?fmt(-r.w.owed):'–'}</td><td><b>${fmt(r.w.total)}</b></td></tr>`).join('')}
   </tbody></table></div>
+  <p class="hint" style="color:#C9D2FF;text-align:center;margin-top:-6px">Family bonus: $20k per kid, $25k for being married. Joy is worth $5k a point.</p>
+  ${awardsHTML(s)}
   <button class="big" data-a="reset">Play again</button>`;
  if(firstPaint){document.querySelectorAll('#over .pod .pawn').forEach((e,k,all)=>{const place=Number(e.parentElement.querySelector('.blk').textContent)-1;e.style.animationDelay=((2-place)*.35+.6)+'s';});setTimeout(()=>{overAnimated=true;},50);}
  else document.querySelectorAll('#over .pod .pawn').forEach(e=>e.style.animation='none');}
@@ -988,10 +1192,17 @@ function react(i){const now=Date.now();if(now-lastReact<700)return;lastReact=now
 document.addEventListener('click',e=>{
  if(e.target.closest('#overlay'))return;
  const tb=e.target.closest('[data-t]');if(tb&&!tb.disabled){const v=tb.dataset.t;
+  if(v==='build'){buildOpen=true;render();return;}
+  if(v==='buildDone'){buildOpen=false;render();return;}
   if(v==='open'){openTrade();if(tradeOpen&&$('tradeBox').scrollIntoView)$('tradeBox').scrollIntoView({behavior:'smooth',block:'nearest'});}
   else if(v==='cancel'){act('tradeCancel');}
   else if(canAnswer())act('tradeAnswer',v==='yes');return;}
  const rb=e.target.closest('[data-r]');if(rb){react(Number(rb.dataset.r));return;}
+ const bd=e.target.closest('[data-bid]');if(bd&&!bd.disabled){if(canBid())act('bid',Number(bd.dataset.bid));return;}
+ if(e.target.closest('[data-fold]')){if(canBid())act('fold');return;}
+ const bl=e.target.closest('[data-build]');if(bl&&!bl.disabled){if(canAct())act('build',Number(bl.dataset.build));return;}
+ const tg=e.target.closest('[data-target]');if(tg){if(canAct())act('target',Number(tg.dataset.target));return;}
+ const cl=e.target.closest('[data-claim]');if(cl){act('claim',Number(cl.dataset.claim));return;}
  const b=e.target.closest('[data-a]');if(b&&!b.disabled){const a=b.dataset.a,v=b.dataset.v;
   if(a==='reset'){act('reset');return;}
   if(!canAct())return;
@@ -1006,6 +1217,7 @@ document.addEventListener('keydown',e=>{const t=e.target.closest&&e.target.close
 function join(){const n=$('name').value.trim();if(!n)return $('name').focus();if(S.players.length>=4)return;act('join',n.slice(0,14),ME);$('name').value='';}
 $('joinBtn').onclick=join;$('name').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
 $('laps').onchange=e=>act('laps',Number(e.target.value));
+for(const k in RULE_OPTS){const el=$('r-'+k);if(el)el.onchange=e=>{const raw=e.target.value;act('rules',k,raw==='true'?true:raw==='false'?false:Number(raw));};}
 $('startBtn').onclick=()=>act('start');
 $('resetBtn').onclick=()=>{if(!resetArm){resetArm=true;render();setTimeout(()=>{resetArm=false;render();},3500);return;}resetArm=false;act('reset');};
 $('hostBtn').onclick=()=>hostRoom(newCode(),null);

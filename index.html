@@ -419,7 +419,7 @@ td.owed{color:var(--bad)}
       <li><b>Moving</b>: spin 1–10 and go clockwise. First turn, choose uni (costs $40k, better-paid jobs) or start working (a $40k head start, lower pay).</li>
       <li><b>Payday</b>: each time you pass it you collect your salary, minus $3k per kid. Negative cash costs 10% interest.</li>
       <li><b>Suburbs</b>: buy them when you land on an empty one. Others pay you rent. Own both suburbs of a colour and rent doubles.</li>
-      <li><b>Auctions</b>: if you pass on a suburb (or can't afford it), everyone takes turns bidding. Fold to drop out; the last bidder standing wins.</li>
+      <li><b>Auctions</b>: if you pass on a suburb (or can't afford it), everyone takes turns bidding. Bidding opens at half the list price, so nobody gets a suburb for a steal. Fold to drop out; the last bidder standing wins.</li>
       <li><b>Houses and hotels</b>: on your turn, before you spin, build on any suburb where you own the whole colour. 1 house triples the rent, 2 houses is ×4, a hotel is ×6. Each costs half the suburb's price. Reno spaces let you add one anywhere you own, set or not.</li>
       <li><b>Trading</b>: on your turn, before you spin, offer suburbs and cash to another player.</li>
       <li><b>Bank of Mum and Dad</b>: borrow money on your turn (the amount is a house rule). You lose 2 joy each Payday until you pay it back; repaying earns 3 joy. Anything owed comes off your final score.</li>
@@ -564,6 +564,8 @@ const CARDS=[
 function payday(s,i){const p=s.players[i];p.laps++;const pay=p.salary-p.kids*3;p.cash+=pay;
  let t=`${p.name} hit Payday: ${fmt(pay)}`;if(p.cash<0){const int=Math.round(-p.cash*0.1);p.cash-=int;t+=`, ${fmt(int)} interest on debt`;}
  log(s,i,t);
+ {const live=s.players.map((q,j)=>j).filter(j=>!s.players[j].retired||j===i);if(live.length>1){const ws=live.map(j=>({j,w:worth(s,j).total}));const lo=ws.reduce((a,b)=>b.w<a.w?b:a),hi=ws.reduce((a,b)=>b.w>a.w?b:a);
+  if(lo.j===i&&hi.w-lo.w>=80){p.cash+=15;log(s,i,`Underdog bonus: the mates chip in. +$15k for ${p.name}`);}}}
  if(owes(p)){p.happy-=2;log(s,i,`Mum asked ${p.name} about the loan again. −2 joy`);}
  if(p.laps>=s.laps){p.retired=true;p.pos=0;const order=s.players.filter(x=>x.retired).length;const b=[30,15,5][order-1]||0;p.cash+=b;log(s,i,`${p.name} retires${b?` with a ${fmt(b)} bonus`:''}`);}
 }
@@ -604,9 +606,10 @@ function endTurn(s){s.pending=null;s.trade=null;s.auction=null;const n=s.players
 }
 /* auctions: everyone bids in turn; the last one standing wins */
 function startAuction(s,tile){if(!s.rules.auctions)return false;const n=s.players.length;const order=[];
- for(let k=1;k<=n;k++){const i=(s.turn+k)%n;if(s.players[i].cash>=10)order.push(i);}
- if(!order.length)return false;
- s.pending=null;s.auction={tile,high:0,leader:null,order,cur:-1,folded:[]};log(s,null,`${T[tile].full} goes to auction!`);nextBidder(s);return true;}
+ const floor=Math.max(10,Math.round(T[tile].p/2));
+ for(let k=1;k<=n;k++){const i=(s.turn+k)%n;if(s.players[i].cash>=floor)order.push(i);}
+ if(!order.length){log(s,null,`${T[tile].full} stays on the market: nobody can meet the ${fmt(floor)} reserve`);return false;}
+ s.pending=null;s.auction={tile,floor,high:floor-10,leader:null,order,cur:-1,folded:[]};log(s,null,`${T[tile].full} goes to auction! Opening bid ${fmt(floor)}`);nextBidder(s);return true;}
 function nextBidder(s){const a=s.auction;const live=a.order.filter(i=>!a.folded.includes(i));
  if(!live.length||(live.length===1&&a.leader===live[0]))return finishAuction(s);
  let k=a.cur;for(let g=0;g<a.order.length*2;g++){k=(k+1)%a.order.length;const i=a.order[k];
@@ -1088,7 +1091,7 @@ function dockHTML(s){const p=s.players[s.turn],pd=s.pending,who=esc(p.name),mine
  if(spinning)return `<div class="waiting">${pawnHTML(PCOL[p.color],'')}<div><div class="h sm">${who} is spinning…</div></div></div>`;
  if(s.auction&&s.auction.cur>=0){const a=s.auction,t=T[a.tile],bi=a.order[a.cur],b=s.players[bi],lead=a.leader!=null?s.players[a.leader]:null;
   const head=`<div class="auc" style="--g:${GCOL[t.g]}"><div class="auc-l"><span class="sub">Going to auction</span><span class="h">${esc(t.full)}</span><span class="hint">List price ${fmt(t.p)} · rent ${fmt(t.r)}</span></div>
-   <div class="auc-r"><span class="sub">${lead?esc(lead.name)+' leads':'No bids yet'}</span><span class="auc-amt${lead?'':' none'}">${fmt(a.high)}</span></div></div>
+   <div class="auc-r"><span class="sub">${lead?esc(lead.name)+' leads':'Opening bid'}</span><span class="auc-amt${lead?'':' none'}">${fmt(lead?a.high:a.high+10)}</span></div></div>
    <div class="bidders">${a.order.map(i=>{const q=s.players[i];return `<span class="bidder${a.folded.includes(i)?' out':''}${i===bi?' now':''}${i===a.leader?' lead':''}" style="--c:${PCOL[q.color]}">${esc(q.name)}</span>`}).join('')}</div>`;
   if(canBid())return `<div class="dockhead"><span class="h">${multi()?esc(b.name)+', your bid':'Your bid'}</span>${tmrHTML()}</div>${head}
    <div class="row3">${[10,25,50].map(n=>`<button class="big" data-bid="${n}"${b.cash<a.high+n?' disabled':''}>+$${n}k</button>`).join('')}</div>

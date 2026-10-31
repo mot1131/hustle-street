@@ -1,6 +1,6 @@
 # Hustle Street
 
-A 2–4 player phone board game: buy Adelaide suburbs, pick a career, get married, have kids, trade with your mates and retire rich.
+A 2–5 player phone board game: buy Adelaide suburbs, pick a career, get married, have kids, trade with your mates and retire rich.
 
 **Play:** https://mot1131.github.io/hustle-street/ — tap **Host a new game**, then **Invite** to send your mates the link. They open it in Safari or Chrome. No app or account needed.
 

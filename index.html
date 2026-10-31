@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Hustle Street">
-<meta name="description" content="A 2–4 player phone board game: buy Adelaide suburbs, pick a career, get married, retire rich.">
+<meta name="description" content="A 2–5 player phone board game: buy Adelaide suburbs, pick a career, get married, retire rich.">
 <title>Hustle Street</title>
 <link rel="preload" href="fonts/lilita-one-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -76,7 +76,7 @@ button:disabled{opacity:.45;cursor:default;transform:none!important}
 .sign>div{border:3px solid #fff;border-radius:7px;padding:10px 18px 8px;display:flex;flex-direction:column;align-items:center;font-family:var(--f-display);font-size:52px;line-height:.95;letter-spacing:.03em;color:#fff}
 .sign .y{color:var(--sun)}
 .post{width:12px;height:32px;background:#9AA6C8;border-left:3px solid var(--ink);border-right:3px solid var(--ink)}
-.pawns{display:flex;align-items:flex-end;gap:14px;margin-top:-4px}
+.pawns{display:flex;align-items:flex-end;gap:11px;margin-top:-4px}
 .tagline{margin:0;text-align:center;color:#fff;font-weight:800;font-size:16.5px;line-height:1.35}
 .codein{font-family:var(--f-display);font-size:28px;letter-spacing:.35em;text-align:center;text-transform:uppercase;background:var(--mist);border:2.5px solid var(--ink);border-radius:12px;padding:8px 0 6px 0.35em;color:var(--ink);min-width:0;width:100%}
 .codein::placeholder{color:#9AA3C7}
@@ -135,6 +135,7 @@ button:disabled{opacity:.45;cursor:default;transform:none!important}
 .srow{display:flex;align-items:center;gap:7px;padding:5px 8px;border-bottom:1.5px solid var(--line)}
 .srow:last-child{border-bottom:0}
 .srow.now{background:var(--sunsoft)}
+.score.five .srow{padding:3px 8px;gap:6px}.score.five .srow .pawn{--s:.5}.score.five .srow .j{display:none}
 .srow.out{opacity:.55}
 .srow .pawn{--s:.62}.srow .pawn .bs{display:none}
 .srow .who{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
@@ -332,7 +333,7 @@ td.owed{color:var(--bad)}
 .seat.new{animation:seatin .55s cubic-bezier(.2,1.5,.4,1)}
 @keyframes seatin{from{transform:translateX(-40px) scale(.8);opacity:0}}
 .pawns .pawn{animation:heroin .8s cubic-bezier(.3,1.6,.5,1) both}
-.pawns .pawn:nth-child(2){animation-delay:.1s}.pawns .pawn:nth-child(3){animation-delay:.2s}.pawns .pawn:nth-child(4){animation-delay:.3s}
+.pawns .pawn:nth-child(2){animation-delay:.1s}.pawns .pawn:nth-child(3){animation-delay:.2s}.pawns .pawn:nth-child(4){animation-delay:.3s}.pawns .pawn:nth-child(5){animation-delay:.4s}
 @keyframes heroin{from{transform:translateY(-90px);opacity:0}}
 .sign{animation:signin .9s cubic-bezier(.3,1.5,.5,1) both}
 @keyframes signin{from{transform:rotate(-14deg) scale(.6);opacity:0}to{transform:rotate(-3deg)}}
@@ -365,7 +366,7 @@ td.owed{color:var(--bad)}
       <label class="h" for="codeIn">Join with a code</label>
       <div class="joinrow"><input class="codein" id="codeIn" maxlength="4" placeholder="KX7P" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="big mint" id="joinCodeBtn">Join</button></div>
     </div>
-    <div class="boxlid"><div><b>2–4</b><span>players</span></div><div><b>20–50</b><span>minutes</span></div><div><b>10+</b><span>ages</span></div></div>
+    <div class="boxlid"><div><b>2–5</b><span>players</span></div><div><b>20–50</b><span>minutes</span></div><div><b>10+</b><span>ages</span></div></div>
   </section>
 
   <section id="lobby" class="stack" style="gap:14px" hidden>
@@ -445,7 +446,8 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const fmt=k=>(k<0?'−':'')+'$'+Math.abs(Math.round(k))+'k';
 const rnd=n=>Math.floor(Math.random()*n);
 const reduceMotion=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
-const PCOL=['#FFC53D','#FF7EB6','#2BB673','#4D8DFF'];
+const MAXP=5;
+const PCOL=['#FFC53D','#FF7EB6','#2BB673','#4D8DFF','#B07CFF'];
 const GCOL={A:'#8B5CF6',B:'#0EA5A4',C:'#F97316',D:'#2563EB',E:'#E11D48'};
 const GNAME={A:'purple',B:'teal',C:'orange',D:'blue',E:'red'};
 const IC={
@@ -684,11 +686,11 @@ const isInt=(v,lo,hi)=>Number.isInteger(v)&&v>=lo&&v<=hi;
 
 function allowed(s,from,name,args){const tp=s.players[s.turn];const seated=s.players.some(p=>p.uid===from);
  switch(name){
-  case 'join':return s.phase==='lobby'&&s.players.length<4&&typeof args[0]==='string'&&args[0].trim().length>0;
-  case 'leave':return s.phase==='lobby'&&isInt(args[0],0,3)&&!!s.players[args[0]]&&s.players[args[0]].uid===from;
+  case 'join':return s.phase==='lobby'&&s.players.length<MAXP&&typeof args[0]==='string'&&args[0].trim().length>0;
+  case 'leave':return s.phase==='lobby'&&isInt(args[0],0,MAXP-1)&&!!s.players[args[0]]&&s.players[args[0]].uid===from;
   case 'laps':return s.phase==='lobby'&&seated&&[2,3,4].includes(args[0]);
   case 'rules':return s.phase==='lobby'&&seated&&Object.prototype.hasOwnProperty.call(RULE_OPTS,args[0])&&RULE_OPTS[args[0]].includes(args[1]);
-  case 'claim':{const seat=s.players[args[0]];return isInt(args[0],0,3)&&!!seat&&seat.uid!==from&&!onlineIds().includes(seat.uid)&&!s.players.some(p=>p.uid===from);}
+  case 'claim':{const seat=s.players[args[0]];return isInt(args[0],0,MAXP-1)&&!!seat&&seat.uid!==from&&!onlineIds().includes(seat.uid)&&!s.players.some(p=>p.uid===from);}
   case 'timeout':return from===ME&&s.phase==='play';
   case 'bid':{const a=s.auction;if(s.phase!=='play'||!a||a.cur<0)return false;const bp=s.players[a.order[a.cur]];return !!bp&&bp.uid===from&&[10,25,50].includes(args[0])&&bp.cash>=a.high+args[0];}
   case 'fold':{const a=s.auction;if(s.phase!=='play'||!a||a.cur<0)return false;const bp=s.players[a.order[a.cur]];return !!bp&&bp.uid===from;}
@@ -1005,7 +1007,7 @@ function buildBoard(){
  $('board').innerHTML=h;
  tileEls=[...document.querySelectorAll('#board .tile')];
  $('reacts').innerHTML=EMO.map((e,i)=>`<button data-r="${i}" aria-label="React ${e}">${e}</button>`).join('');
- $('heroPawns').innerHTML=[[0,1.15],[1,1],[2,1.05],[3,.92]].map(([c,s])=>`<span class="pawn" style="--c:${PCOL[c]};--s:${s}"><span class="hd"></span><span class="bd"></span><span class="bs"></span></span>`).join('');
+ $('heroPawns').innerHTML=[[0,1.1],[1,.95],[2,1.02],[3,.9],[4,.98]].map(([c,s])=>`<span class="pawn" style="--c:${PCOL[c]};--s:${s}"><span class="hd"></span><span class="bd"></span><span class="bs"></span></span>`).join('');
 }
 
 /* ---------- render ---------- */
@@ -1041,7 +1043,7 @@ function renderLobby(s){
  const mineN=s.players.filter(isMine).length;
  $('joinBtn').textContent=mineN?'Add':'Join';
  $('name').placeholder=mineN?'Add another name':'Your name';
- const full=s.players.length>=4;$('joinBtn').disabled=full||busy||!ready;$('name').disabled=full||!ready;
+ const full=s.players.length>=MAXP;$('joinBtn').disabled=full||busy||!ready;$('name').disabled=full||!ready;
  $('laps').value=String(s.laps);$('laps').disabled=busy||!ready||!mineN;
  for(const k in RULE_OPTS){const el=$('r-'+k);if(!el)continue;el.value=String(s.rules[k]);el.disabled=busy||!ready||!mineN;}
  $('startBtn').disabled=s.players.length<2||busy||!mineN;
@@ -1061,6 +1063,7 @@ function renderGame(s){
   const here=s.players.map((p,j)=>({p,j})).filter(x=>x.p.pos===t.i&&!x.p.retired&&x.j!==hideMover).sort((a,b)=>(a.j===s.turn)-(b.j===s.turn)).reverse();
   el.querySelector('.toks').innerHTML=here.map(x=>pawnHTML(PCOL[x.p.color],'')).join('');
   el.classList.toggle('here',!spinning&&!!curP&&!curP.retired&&curP.pos===t.i);});
+ $('score').classList.toggle('five',s.players.length>=5);
  $('score').innerHTML=s.players.map((p,i)=>`<div class="srow${i===s.turn?' now':''}${p.retired?' out':''}">${pawnHTML(PCOL[p.color],'')}<div class="who"><span class="n">${esc(p.name)}${isMine(p)&&!multi()?' (you)':''}</span><span class="j">${p.retired?'Retired':p.career?esc(p.career):'No job yet'}${p.skip?' · gap year':''}${onlineIds().includes(p.uid)?'':' · away'}</span></div><span class="c${p.cash<0?' neg':''}">${fmt(p.cash)}</span></div>`).join('');
  $('hub').textContent=spinning?(spinShown??'?'):(s.lastSpin??'–');
  $('pot').hidden=!s.rules.jackpot;$('potAmt').textContent=fmt(s.pot||0);
@@ -1214,7 +1217,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{const t=e.target.closest&&e.target.closest('[data-tile]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.click();}
  if(e.key==='Escape'&&!$('overlay').hidden)closeOverlay();});
-function join(){const n=$('name').value.trim();if(!n)return $('name').focus();if(S.players.length>=4)return;act('join',n.slice(0,14),ME);$('name').value='';}
+function join(){const n=$('name').value.trim();if(!n)return $('name').focus();if(S.players.length>=MAXP)return;act('join',n.slice(0,14),ME);$('name').value='';}
 $('joinBtn').onclick=join;$('name').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
 $('laps').onchange=e=>act('laps',Number(e.target.value));
 for(const k in RULE_OPTS){const el=$('r-'+k);if(el)el.onchange=e=>{const raw=e.target.value;act('rules',k,raw==='true'?true:raw==='false'?false:Number(raw));};}

@@ -423,7 +423,7 @@ td.owed{color:var(--bad)}
       <li><b>Auctions</b>: if you pass on a suburb (or can't afford it), everyone takes turns bidding. You can only buy a suburb outright if you'd still have $30k left for rent. Bidding opens at half the list price, so nobody gets a suburb for a steal. Fold to drop out; the last bidder standing wins.</li>
       <li><b>Houses and hotels</b>: on your turn, before you spin, build on any suburb where you own the whole colour. 1 house triples the rent, 2 houses is ×4, a hotel is ×6. Each costs half the suburb's price. Reno spaces let you add one anywhere you own, set or not.</li>
       <li><b>Trading</b>: on your turn, before you spin, offer suburbs and cash to another player.</li>
-      <li><b>Bank of Mum and Dad</b>: borrow money on your turn (the amount is a house rule). You lose 2 joy each Payday until you pay it back; repaying after at least one Payday earns 2 joy. Anything owed comes off your final score.</li>
+      <li><b>Bank of Mum and Dad</b>: borrow money on your turn (the amount is a house rule). You can only have one loan at a time. Each Payday until you pay it back, Mum nags you and you lose joy: 1 for a $30k loan, 2 for $50k, 3 for $80k. Anything owed comes off your final score.</li>
       <li><b>Joy</b> comes from weddings, babies, holidays, gap years and good Life cards. Each point is worth $10k at the end. You also get $35k per kid and $40k for being married.</li>
       <li><b>Life cards</b> include a few sneaky ones: Career Swap and Robin Hood let you pick a target.</li>
       <li><b>Lost your phone?</b> Open the invite link on any device and tap your name to rejoin.</li>
@@ -520,7 +520,7 @@ function normalize(s){const f=fresh();for(const k in f)if(!(k in s))s[k]=f[k];s.
  s.players.forEach(p=>{if(p.loan==null)p.loan=0;if(p.freeRent==null)p.freeRent=false;});
  if(s.phase!=='lobby'&&!s.stats)s.stats=s.players.map(newStats);return s;}
 function log(s,i,t){s.log.unshift({t,c:i==null?null:s.players[i].color});s.log=s.log.slice(0,40);}
-const owes=p=>p.loan||0;
+const owes=p=>p.loan||0;const nagOf=amt=>Math.max(1,Math.round(amt/25));
 const ownedBy=(s,i)=>Object.keys(s.owned).filter(k=>s.owned[k].owner===i).map(Number);
 let lapsCustom=false;const BUFFER=30;const LVL=[1,3,4,6],LVLNAME=['no houses','1 house','2 houses','a hotel'];
 const hasSet=(s,i,g)=>T.filter(x=>x.g===g).every(x=>s.owned[x.i]&&s.owned[x.i].owner===i);
@@ -567,7 +567,7 @@ function payday(s,i){const p=s.players[i];p.laps++;const pay=p.salary-p.kids*3;p
  log(s,i,t);
  {const live=s.players.map((q,j)=>j).filter(j=>!s.players[j].retired||j===i);if(live.length>1){const ws=live.map(j=>({j,w:worth(s,j).total}));const lo=ws.reduce((a,b)=>b.w<a.w?b:a),hi=ws.reduce((a,b)=>b.w>a.w?b:a);
   if(lo.j===i&&hi.w-lo.w>=80){p.cash+=15;log(s,i,`Underdog bonus: the mates chip in. +$15k for ${p.name}`);}}}
- if(owes(p)){p.happy-=2;log(s,i,`Mum asked ${p.name} about the loan again. −2 joy`);}
+ if(owes(p)){const nag=nagOf(owes(p));p.happy-=nag;log(s,i,`Mum asked ${p.name} about the loan again. −${nag} joy`);}
  if(p.laps>=s.laps){p.retired=true;p.pos=0;const order=s.players.filter(x=>x.retired).length;const b=[30,15,5][order-1]||0;p.cash+=b;log(s,i,`${p.name} retires${b?` with a ${fmt(b)} bonus`:''}`);}
 }
 function doSpin(s,n){const i=s.turn,p=s.players[i];s.lastSpin=n;s.spinSeq=(s.spinSeq||0)+1;const st=s.stats&&s.stats[i];if(st){st.spins++;st.spinSum+=n;}log(s,i,`${p.name} spun ${n}`);
@@ -660,7 +660,7 @@ const A={
  borrow:(s)=>{const p=s.players[s.turn],selling=s.pending&&s.pending.type==='sell';if(owes(p)||(s.pending&&!selling)||s.trade||s.auction)return;const amt=s.rules.loan;p.loan=amt;p.loanLap=p.laps;p.cash+=amt;log(s,s.turn,`${p.name} borrowed ${fmt(amt)} from the Bank of Mum and Dad`);if(selling){s.pending=null;endTurn(s);}},
  sell:(s,k)=>{const i=s.turn,p=s.players[i],o=s.owned[k];if(!o||o.owner!==i)return;const v=sellValue(s,k);p.cash+=v;delete s.owned[k];if(s.stats)s.stats[i].sold=(s.stats[i].sold||0)+1;
   log(s,i,`${p.name} sold ${T[k].full} back to the bank for ${fmt(v)}`);s.pending=null;endTurn(s);},
- repay:(s)=>{const p=s.players[s.turn];if(!owes(p)||p.cash<owes(p))return;p.cash-=owes(p);p.loan=0;const proud=p.loanLap==null||p.laps>p.loanLap;if(proud)p.happy+=2;log(s,s.turn,proud?`${p.name} paid Mum and Dad back. They're proud. +2 joy`:`${p.name} paid Mum and Dad straight back. They're confused, not proud`);},
+ repay:(s)=>{const p=s.players[s.turn];if(!owes(p)||p.cash<owes(p))return;p.cash-=owes(p);p.loan=0;log(s,s.turn,`${p.name} paid Mum and Dad back. No more awkward phone calls`);},
  propose:(s,t)=>{if(s.pending||s.trade||s.auction)return;s.trade=t;log(s,t.from,`${s.players[t.from].name} offered ${s.players[t.to].name} a trade`);},
  tradeCancel:(s)=>{const t=s.trade;if(!t)return;s.trade=null;log(s,t.from,`${s.players[t.from].name} withdrew their offer`);},
  tradeAnswer:(s,yes)=>{const t=s.trade;if(!t)return;s.trade=null;const a=s.players[t.from],b=s.players[t.to];
@@ -1125,7 +1125,7 @@ function dockHTML(s){const p=s.players[s.turn],pd=s.pending,who=esc(p.name),mine
  if(!pd){const canBuild=buildable(s,s.turn).length>0;const loan=s.rules.loan;
   return head+`<button class="big" id="spinBtn">Spin</button>
   <div class="row3"><button class="btn c" data-t="open"${s.players.length<2?' disabled':''}>${svg('swap',17,2.6)}Trade</button><button class="btn c" data-t="build"${canBuild?'':' disabled'}>${svg('hammer',17,2.6)}Build</button>${owes(p)?`<button class="btn c" data-a="repay"${p.cash<owes(p)?' disabled':''}>${svg('house',17,2.6)}Repay</button>`:`<button class="btn c" data-a="borrow">${svg('house',17,2.6)}Mum&amp;Dad</button>`}</div>
-  <p class="hint">${owes(p)?`You owe Mum and Dad ${fmt(owes(p))}. Paying it back after a Payday earns 2 joy.`:`Mum and Dad will lend you ${fmt(loan)}, but you lose 2 joy each Payday until it’s paid back.`}${canBuild?' You own a full set, so you can build houses.':''}</p>`;}
+  <p class="hint">${owes(p)?`You owe Mum and Dad ${fmt(owes(p))}. Pay it back to stop losing ${nagOf(owes(p))} joy every Payday.`:`Mum and Dad will lend you ${fmt(loan)}, but you lose ${nagOf(loan)} joy each Payday until it’s paid back.`}${canBuild?' You own a full set, so you can build houses.':''}</p>`;}
  if(pd.type==='path')return `<h2 class="h">${who}, pick your path</h2><div class="stack">
   <button class="btn pick" data-a="path" data-v="uni">Go to uni<small>Pay $40k now, choose from jobs paying $38k–$68k</small></button>
   <button class="btn" data-a="path" data-v="work">Start working<small>Get a $40k head start, choose from jobs paying $18k–$34k</small></button></div>`;

@@ -416,14 +416,14 @@ td.owed{color:var(--bad)}
     <summary>How to play</summary>
     <ul>
       <li><b>Joining</b>: one person taps Host and shares the room code. Everyone else opens the link and joins. Keep the host's screen on. If the host closes the page the game pauses until they reopen it and tap Resume.</li>
-      <li><b>Moving</b>: spin 1–10 and go clockwise. First turn, choose uni ($40k, better-paid jobs) or start working straight away.</li>
+      <li><b>Moving</b>: spin 1–10 and go clockwise. First turn, choose uni (costs $40k, better-paid jobs) or start working (a $40k head start, lower pay).</li>
       <li><b>Payday</b>: each time you pass it you collect your salary, minus $3k per kid. Negative cash costs 10% interest.</li>
       <li><b>Suburbs</b>: buy them when you land on an empty one. Others pay you rent. Own both suburbs of a colour and rent doubles.</li>
       <li><b>Auctions</b>: if you pass on a suburb (or can't afford it), everyone takes turns bidding. Fold to drop out; the last bidder standing wins.</li>
-      <li><b>Houses and hotels</b>: on your turn, before you spin, build on any suburb where you own the whole colour. 1 house triples the rent, 2 houses is ×5, a hotel is ×8. Each costs half the suburb's price. Reno spaces let you add one anywhere you own, set or not.</li>
+      <li><b>Houses and hotels</b>: on your turn, before you spin, build on any suburb where you own the whole colour. 1 house triples the rent, 2 houses is ×4, a hotel is ×6. Each costs half the suburb's price. Reno spaces let you add one anywhere you own, set or not.</li>
       <li><b>Trading</b>: on your turn, before you spin, offer suburbs and cash to another player.</li>
       <li><b>Bank of Mum and Dad</b>: borrow money on your turn (the amount is a house rule). You lose 2 joy each Payday until you pay it back; repaying earns 3 joy. Anything owed comes off your final score.</li>
-      <li><b>Joy</b> comes from weddings, babies, holidays, gap years and good Life cards. Each point is worth $5k at the end. You also get $20k per kid and $25k for being married.</li>
+      <li><b>Joy</b> comes from weddings, babies, holidays, gap years and good Life cards. Each point is worth $10k at the end. You also get $35k per kid and $40k for being married.</li>
       <li><b>Life cards</b> include a few sneaky ones: Career Swap and Robin Hood let you pick a target.</li>
       <li><b>Lost your phone?</b> Open the invite link on any device and tap your name to rejoin.</li>
       <li>After your last lap you retire (first retiree gets $30k, second $15k, third $5k). Retired players still collect rent. When everyone has retired, the highest net worth wins.</li>
@@ -521,13 +521,13 @@ function normalize(s){const f=fresh();for(const k in f)if(!(k in s))s[k]=f[k];s.
 function log(s,i,t){s.log.unshift({t,c:i==null?null:s.players[i].color});s.log=s.log.slice(0,40);}
 const owes=p=>p.loan||0;
 const ownedBy=(s,i)=>Object.keys(s.owned).filter(k=>s.owned[k].owner===i).map(Number);
-const LVL=[1,3,5,8],LVLNAME=['no houses','1 house','2 houses','a hotel'];
+const LVL=[1,3,4,6],LVLNAME=['no houses','1 house','2 houses','a hotel'];
 const hasSet=(s,i,g)=>T.filter(x=>x.g===g).every(x=>s.owned[x.i]&&s.owned[x.i].owner===i);
 const buildCost=k=>T[k].p/2;
 function rentOf(s,idx){const t=T[idx],o=s.owned[idx],lv=o.level||0;return lv?t.r*LVL[lv]:t.r*(hasSet(s,o.owner,t.g)?2:1);}
-const family=p=>p.kids*20+(p.partner?25:0);
+const family=p=>p.kids*35+(p.partner?40:0);
 function worth(s,i){const p=s.players[i];let prop=0;ownedBy(s,i).forEach(k=>{prop+=T[k].p*(1+.5*(s.owned[k].level||0))});const fam=family(p);
- return {cash:p.cash,prop:Math.round(prop),joy:p.happy*5,fam,owed:owes(p),total:Math.round(p.cash+prop+p.happy*5+fam-owes(p))};}
+ return {cash:p.cash,prop:Math.round(prop),joy:p.happy*10,fam,owed:owes(p),total:Math.round(p.cash+prop+p.happy*10+fam-owes(p))};}
 function spend(s,p,amt){p.cash-=amt;if(s.rules&&s.rules.jackpot&&amt>0)s.pot=(s.pot||0)+amt;}
 const stat=(s,i)=>(s.stats&&s.stats[i])||newStats();
 const buildable=(s,i)=>ownedBy(s,i).filter(k=>hasSet(s,i,T[k].g)&&(s.owned[k].level||0)<3);
@@ -631,7 +631,7 @@ const A={
   log(s,null,`Game on: ${s.players.length} players, ${s.laps} laps, $${s.rules.cash}k each`);},
  spin:doSpin,
  path:(s,ch)=>{const p=s.players[s.turn];if(ch==='uni'){p.cash-=40;p.degree=true;log(s,s.turn,`${p.name} heads to uni. −$40k`);s.pending={type:'job',options:pick2(JOBS.filter(j=>j.d)),after:'spin'};}
-  else{log(s,s.turn,`${p.name} skips uni and starts working`);s.pending={type:'job',options:pick2(JOBS.filter(j=>!j.d)),after:'spin'};}},
+  else{p.cash+=40;log(s,s.turn,`${p.name} skips uni and starts working: +$40k head start`);s.pending={type:'job',options:pick2(JOBS.filter(j=>!j.d)),after:'spin'};}},
  job:(s,name)=>{const p=s.players[s.turn],after=s.pending.after;
   if(name){const j=JOBS.find(x=>x.n===name);p.career=j.n;p.salary=j.s;log(s,s.turn,`${p.name} is now ${an(j.n)} ${j.n.toLowerCase()} on ${fmt(j.s)} a lap`);}
   else log(s,s.turn,`${p.name} keeps their job`);
@@ -1114,12 +1114,12 @@ function dockHTML(s){const p=s.players[s.turn],pd=s.pending,who=esc(p.name),mine
   <p class="hint">${owes(p)?`You owe Mum and Dad ${fmt(owes(p))}. Paying it back earns 3 joy.`:`Mum and Dad will lend you ${fmt(loan)}, but you lose 2 joy each Payday until it’s paid back.`}${canBuild?' You own a full set, so you can build houses.':''}</p>`;}
  if(pd.type==='path')return `<h2 class="h">${who}, pick your path</h2><div class="stack">
   <button class="btn pick" data-a="path" data-v="uni">Go to uni<small>Pay $40k now, choose from jobs paying $38k–$68k</small></button>
-  <button class="btn" data-a="path" data-v="work">Start working<small>Free, choose from jobs paying $18k–$34k</small></button></div>`;
+  <button class="btn" data-a="path" data-v="work">Start working<small>Get a $40k head start, choose from jobs paying $18k–$34k</small></button></div>`;
  if(pd.type==='job')return `<h2 class="h">${who}, choose a job</h2><div class="stack">${pd.options.map(n=>{const j=JOBS.find(x=>x.n===n);return `<button class="btn" data-a="job" data-v="${esc(n)}">${esc(n)}<small>${fmt(j.s)} every Payday</small></button>`}).join('')}
   ${p.career?`<button class="btn" data-a="job" data-v="">Keep being ${an(p.career)} ${esc(p.career.toLowerCase())}<small>${fmt(p.salary)} every Payday</small></button>`:''}</div>`;
  if(pd.type==='buy'){const t=T[pd.tile];const mate=T.find(x=>x.g===t.g&&x.i!==t.i);
   return `<div class="deed"><div class="dh" style="background:${GCOL[t.g]}"><small>TITLE DEED</small><div>${esc(t.full.toUpperCase())}</div></div>
-   <dl><dt>Rent</dt><dd>${fmt(t.r)}</dd><dt>With ${esc(mate.full)} too</dt><dd>${fmt(t.r*2)}</dd><dt>With 1 house</dt><dd>${fmt(t.r*3)}</dd><dt>With 2 houses</dt><dd>${fmt(t.r*5)}</dd><dt>With a hotel</dt><dd>${fmt(t.r*8)}</dd></dl>
+   <dl><dt>Rent</dt><dd>${fmt(t.r)}</dd><dt>With ${esc(mate.full)} too</dt><dd>${fmt(t.r*2)}</dd><dt>With 1 house</dt><dd>${fmt(t.r*3)}</dd><dt>With 2 houses</dt><dd>${fmt(t.r*4)}</dd><dt>With a hotel</dt><dd>${fmt(t.r*6)}</dd></dl>
    <dl><dt>Each house or hotel</dt><dd>${fmt(t.p/2)}</dd><dt>Worth at the end</dt><dd>${fmt(t.p)} + ${fmt(t.p/2)} per building</dd></dl></div>
    <div class="sub" style="text-align:center">${who} has ${fmt(p.cash)}</div>
    <button class="big" data-a="buy" data-v="1">Buy for ${fmt(t.p)}</button><button class="btn c" data-a="buy" data-v="">${s.rules.auctions?'Pass and send to auction':'Pass'}</button>`;}
@@ -1156,7 +1156,7 @@ function renderOver(s){const rows=s.players.map((p,i)=>({p,w:worth(s,i)})).sort(
   <div class="tbl"><table><thead><tr><th>Player</th><th>Cash</th><th>Suburbs</th><th>Joy</th><th>Family</th><th>Owed</th><th>Total</th></tr></thead><tbody>
   ${rows.map(r=>`<tr><td><b>${esc(r.p.name)}</b></td><td>${fmt(r.w.cash)}</td><td>${fmt(r.w.prop)}</td><td>${fmt(r.w.joy)}</td><td>${r.w.fam?fmt(r.w.fam):'–'}</td><td class="owed">${r.w.owed?fmt(-r.w.owed):'–'}</td><td><b>${fmt(r.w.total)}</b></td></tr>`).join('')}
   </tbody></table></div>
-  <p class="hint" style="color:#C9D2FF;text-align:center;margin-top:-6px">Family bonus: $20k per kid, $25k for being married. Joy is worth $5k a point.</p>
+  <p class="hint" style="color:#C9D2FF;text-align:center;margin-top:-6px">Family bonus: $35k per kid, $40k for being married. Joy is worth $10k a point.</p>
   ${awardsHTML(s)}
   <button class="big" data-a="reset">Play again</button>`;
  if(firstPaint){document.querySelectorAll('#over .pod .pawn').forEach((e,k,all)=>{const place=Number(e.parentElement.querySelector('.blk').textContent)-1;e.style.animationDelay=((2-place)*.35+.6)+'s';});setTimeout(()=>{overAnimated=true;},50);}

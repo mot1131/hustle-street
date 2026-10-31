@@ -418,7 +418,7 @@ td.owed{color:var(--bad)}
     <ul>
       <li><b>Joining</b>: one person taps Host and shares the room code. Everyone else opens the link and joins. Keep the host's screen on. If the host closes the page the game pauses until they reopen it and tap Resume.</li>
       <li><b>Moving</b>: spin 1–10 and go clockwise. First turn, choose uni (costs $40k, better-paid jobs) or start working (a $40k head start, lower pay).</li>
-      <li><b>Payday</b>: each time you pass it you collect your salary, minus $3k per kid. Negative cash costs 10% interest. If you're the furthest behind by $80k or more, the mates chip in an extra $15k.</li>
+      <li><b>Payday</b>: each time you pass it you collect your salary, minus $3k per kid. Negative cash costs 10% interest (max $15k a Payday). Rent can't push you more than $100k into the red: the landlord just gets what you can scrape together. If you're the furthest behind by $80k or more, the mates chip in an extra $15k.</li>
       <li><b>Suburbs</b>: buy them when you land on an empty one. Others pay you rent. Own both suburbs of a colour and rent doubles.</li>
       <li><b>Auctions</b>: if you pass on a suburb (or can't afford it), everyone takes turns bidding. You can only buy a suburb outright if you'd still have $30k left for rent. Bidding opens at half the list price, so nobody gets a suburb for a steal. Fold to drop out; the last bidder standing wins.</li>
       <li><b>Houses and hotels</b>: on your turn, before you spin, build on any suburb where you own the whole colour. 1 house triples the rent, 2 houses is ×4, a hotel is ×6. Each costs half the suburb's price. Reno spaces let you add one anywhere you own, set or not.</li>
@@ -563,7 +563,7 @@ const CARDS=[
 
 /* ---------- game rules ---------- */
 function payday(s,i){const p=s.players[i];p.laps++;const pay=p.salary-p.kids*3;p.cash+=pay;
- let t=`${p.name} hit Payday: ${fmt(pay)}`;if(p.cash<0){const int=Math.round(-p.cash*0.1);p.cash-=int;t+=`, ${fmt(int)} interest on debt`;}
+ let t=`${p.name} hit Payday: ${fmt(pay)}`;if(p.cash<0){const int=Math.min(15,Math.round(-p.cash*0.1));p.cash-=int;t+=`, ${fmt(int)} interest on debt`;}
  log(s,i,t);
  {const live=s.players.map((q,j)=>j).filter(j=>!s.players[j].retired||j===i);if(live.length>1){const ws=live.map(j=>({j,w:worth(s,j).total}));const lo=ws.reduce((a,b)=>b.w<a.w?b:a),hi=ws.reduce((a,b)=>b.w>a.w?b:a);
   if(lo.j===i&&hi.w-lo.w>=80){p.cash+=15;log(s,i,`Underdog bonus: the mates chip in. +$15k for ${p.name}`);}}}
@@ -580,9 +580,9 @@ function land(s,i){const p=s.players[i],t=T[p.pos];
     if(!o){if(p.cash>=t.p+BUFFER){s.pending={type:'buy',tile:p.pos};return;}log(s,i,`${p.name} can't afford ${t.full} (${fmt(t.p)} plus a ${fmt(BUFFER)} rent buffer)`);if(startAuction(s,p.pos))return;break;}
     if(o.owner===i){log(s,i,`${p.name} drops by their place in ${t.full}`);break;}
     if(p.freeRent){p.freeRent=false;log(s,i,`${p.name} used mates rates: no rent in ${t.full}`);break;}
-    const amt=rentOf(s,p.pos);p.cash-=amt;s.players[o.owner].cash+=amt;
+    const full=rentOf(s,p.pos),amt=Math.max(0,Math.min(full,p.cash+100));p.cash-=amt;s.players[o.owner].cash+=amt;
     if(s.stats){s.stats[i].rentOut+=amt;s.stats[o.owner].rentIn+=amt;}
-    log(s,i,`${p.name} paid ${fmt(amt)} rent to ${s.players[o.owner].name} in ${t.full}`);break;}
+    log(s,i,`${p.name} paid ${fmt(amt)} rent to ${s.players[o.owner].name} in ${t.full}${amt<full?` (all they could scrape together of ${fmt(full)})`:''}`);break;}
   case 'life':{const c=CARDS[rnd(CARDS.length)](s,i,p);s.card=Object.assign({seq:((s.card&&s.card.seq)||0)+1,by:i},c);if(s.stats)s.stats[i].cards++;
     log(s,i,`${p.name} drew “${c.t}”: ${c.fx.toLowerCase()}`);if(s.pending)return;break;}
   case 'tax':{const a=Math.max(0,Math.round(p.cash*0.1));spend(s,p,a);log(s,i,`${p.name} paid ${fmt(a)} tax`);break;}

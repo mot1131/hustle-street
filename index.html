@@ -418,12 +418,12 @@ td.owed{color:var(--bad)}
     <ul>
       <li><b>Joining</b>: one person taps Host and shares the room code. Everyone else opens the link and joins. Keep the host's screen on. If the host closes the page the game pauses until they reopen it and tap Resume.</li>
       <li><b>Moving</b>: spin 1–10 and go clockwise. First turn, choose uni (costs $40k, better-paid jobs) or start working (a $40k head start, lower pay).</li>
-      <li><b>Payday</b>: each time you pass it you collect your salary, minus $3k per kid. Negative cash costs 10% interest (max $15k a Payday). Rent can't push you more than $100k into the red: the landlord just gets what you can scrape together. If you're the furthest behind by $80k or more, the mates chip in an extra $15k.</li>
+      <li><b>Payday</b>: each time you pass it you collect your salary, minus $3k per kid. Negative cash costs 10% interest (max $15k a Payday). End your turn in the red and you must sell suburbs back to the bank (for half their value, houses included) until you're back above $0, or borrow from Mum and Dad. With nothing left to sell, rent can't push you more than $100k into the red. If you're the furthest behind by $80k or more, the mates chip in an extra $15k.</li>
       <li><b>Suburbs</b>: buy them when you land on an empty one. Others pay you rent. Own both suburbs of a colour and rent doubles.</li>
       <li><b>Auctions</b>: if you pass on a suburb (or can't afford it), everyone takes turns bidding. You can only buy a suburb outright if you'd still have $30k left for rent. Bidding opens at half the list price, so nobody gets a suburb for a steal. Fold to drop out; the last bidder standing wins.</li>
       <li><b>Houses and hotels</b>: on your turn, before you spin, build on any suburb where you own the whole colour. 1 house triples the rent, 2 houses is ×4, a hotel is ×6. Each costs half the suburb's price. Reno spaces let you add one anywhere you own, set or not.</li>
       <li><b>Trading</b>: on your turn, before you spin, offer suburbs and cash to another player.</li>
-      <li><b>Bank of Mum and Dad</b>: borrow money on your turn (the amount is a house rule). You lose 2 joy each Payday until you pay it back; repaying earns 3 joy. Anything owed comes off your final score.</li>
+      <li><b>Bank of Mum and Dad</b>: borrow money on your turn (the amount is a house rule). You lose 2 joy each Payday until you pay it back; repaying after at least one Payday earns 2 joy. Anything owed comes off your final score.</li>
       <li><b>Joy</b> comes from weddings, babies, holidays, gap years and good Life cards. Each point is worth $10k at the end. You also get $35k per kid and $40k for being married.</li>
       <li><b>Life cards</b> include a few sneaky ones: Career Swap and Robin Hood let you pick a target.</li>
       <li><b>Lost your phone?</b> Open the invite link on any device and tap your name to rejoin.</li>
@@ -580,7 +580,7 @@ function land(s,i){const p=s.players[i],t=T[p.pos];
     if(!o){if(p.cash>=t.p+BUFFER){s.pending={type:'buy',tile:p.pos};return;}log(s,i,`${p.name} can't afford ${t.full} (${fmt(t.p)} plus a ${fmt(BUFFER)} rent buffer)`);if(startAuction(s,p.pos))return;break;}
     if(o.owner===i){log(s,i,`${p.name} drops by their place in ${t.full}`);break;}
     if(p.freeRent){p.freeRent=false;log(s,i,`${p.name} used mates rates: no rent in ${t.full}`);break;}
-    const full=rentOf(s,p.pos),amt=Math.max(0,Math.min(full,p.cash+100));p.cash-=amt;s.players[o.owner].cash+=amt;
+    const full=rentOf(s,p.pos),amt=ownedBy(s,i).length?full:Math.max(0,Math.min(full,p.cash+100));p.cash-=amt;s.players[o.owner].cash+=amt;
     if(s.stats){s.stats[i].rentOut+=amt;s.stats[o.owner].rentIn+=amt;}
     log(s,i,`${p.name} paid ${fmt(amt)} rent to ${s.players[o.owner].name} in ${t.full}${amt<full?` (all they could scrape together of ${fmt(full)})`:''}`);break;}
   case 'life':{const c=CARDS[rnd(CARDS.length)](s,i,p);s.card=Object.assign({seq:((s.card&&s.card.seq)||0)+1,by:i},c);if(s.stats)s.stats[i].cards++;
@@ -598,7 +598,11 @@ function land(s,i){const p=s.players[i],t=T[p.pos];
   case 'reno':{const opts=ownedBy(s,i).filter(k=>(s.owned[k].level||0)<3&&p.cash>=buildCost(k));if(opts.length){s.pending={type:'reno',options:opts};return;}log(s,i,`${p.name} has nothing to renovate`);break;}
  }
  endTurn(s);}
-function endTurn(s){s.pending=null;s.trade=null;s.auction=null;const n=s.players.length;
+const sellValue=(s,k)=>Math.round(.5*(T[k].p+(s.owned[k].level||0)*buildCost(k)));
+function mustSell(s){const i=s.turn,p=s.players[i];if(s.phase!=='play'||!p||p.retired||p.cash>=0)return false;const opts=ownedBy(s,i);if(!opts.length)return false;
+ s.pending={type:'sell',options:opts};s.trade=null;s.auction=null;return true;}
+function endTurn(s){if(mustSell(s)){const p=s.players[s.turn];if(!(s.log[0]&&/must sell/.test(s.log[0].t)))log(s,s.turn,`${p.name} is ${fmt(-p.cash)} in the red and must sell a suburb to the bank`);return;}
+ s.pending=null;s.trade=null;s.auction=null;const n=s.players.length;
  if(s.players.every(p=>p.retired)){s.phase='over';log(s,null,'Everyone has retired. Game over!');return;}
  let idx=s.turn;
  for(let guard=0;guard<n*3;guard++){idx=(idx+1)%n;const p=s.players[idx];if(p.retired)continue;
@@ -653,8 +657,10 @@ const A={
   if(pd.act==='swapjob'){const c=p.career,sl=p.salary;p.career=q.career;p.salary=q.salary;q.career=c;q.salary=sl;log(s,i,`${p.name} swapped jobs with ${q.name} and is now ${an(p.career)} ${p.career.toLowerCase()}`);}
   else{q.cash-=15;p.cash+=15;log(s,i,`${p.name} pinched $15k from ${q.name}`);}
   endTurn(s);},
- borrow:(s)=>{const p=s.players[s.turn];if(owes(p)||s.pending||s.trade||s.auction)return;const amt=s.rules.loan;p.loan=amt;p.cash+=amt;log(s,s.turn,`${p.name} borrowed ${fmt(amt)} from the Bank of Mum and Dad`);},
- repay:(s)=>{const p=s.players[s.turn];if(!owes(p)||p.cash<owes(p))return;p.cash-=owes(p);p.loan=0;p.happy+=3;log(s,s.turn,`${p.name} paid Mum and Dad back. They're proud. +3 joy`);},
+ borrow:(s)=>{const p=s.players[s.turn],selling=s.pending&&s.pending.type==='sell';if(owes(p)||(s.pending&&!selling)||s.trade||s.auction)return;const amt=s.rules.loan;p.loan=amt;p.loanLap=p.laps;p.cash+=amt;log(s,s.turn,`${p.name} borrowed ${fmt(amt)} from the Bank of Mum and Dad`);if(selling){s.pending=null;endTurn(s);}},
+ sell:(s,k)=>{const i=s.turn,p=s.players[i],o=s.owned[k];if(!o||o.owner!==i)return;const v=sellValue(s,k);p.cash+=v;delete s.owned[k];if(s.stats)s.stats[i].sold=(s.stats[i].sold||0)+1;
+  log(s,i,`${p.name} sold ${T[k].full} back to the bank for ${fmt(v)}`);s.pending=null;endTurn(s);},
+ repay:(s)=>{const p=s.players[s.turn];if(!owes(p)||p.cash<owes(p))return;p.cash-=owes(p);p.loan=0;const proud=p.loanLap==null||p.laps>p.loanLap;if(proud)p.happy+=2;log(s,s.turn,proud?`${p.name} paid Mum and Dad back. They're proud. +2 joy`:`${p.name} paid Mum and Dad straight back. They're confused, not proud`);},
  propose:(s,t)=>{if(s.pending||s.trade||s.auction)return;s.trade=t;log(s,t.from,`${s.players[t.from].name} offered ${s.players[t.to].name} a trade`);},
  tradeCancel:(s)=>{const t=s.trade;if(!t)return;s.trade=null;log(s,t.from,`${s.players[t.from].name} withdrew their offer`);},
  tradeAnswer:(s,yes)=>{const t=s.trade;if(!t)return;s.trade=null;const a=s.players[t.from],b=s.players[t.to];
@@ -707,14 +713,16 @@ function allowed(s,from,name,args){const tp=s.players[s.turn];const seated=s.pla
   case 'spin':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade&&!s.auction&&isInt(args[0],1,10);
   case 'propose':{const t=args[0];if(!(s.phase==='play'&&tp&&tp.uid===from&&t&&typeof t==='object'&&!s.auction&&!s.pending))return false;
    const n=s.players.length;return t.from===s.turn&&isInt(t.to,0,n-1)&&t.to!==t.from&&Array.isArray(t.give)&&Array.isArray(t.get)&&t.give.every(k=>isInt(k,0,27))&&t.get.every(k=>isInt(k,0,27))&&isInt(t.giveCash,0,1e6)&&isInt(t.getCash,0,1e6);}
-  case 'path':case 'job':case 'buy':case 'study':case 'reno':return s.phase==='play'&&tp&&tp.uid===from&&!!s.pending&&s.pending.type===name;
-  case 'borrow':case 'repay':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade&&!s.auction;
+  case 'path':case 'job':case 'buy':case 'study':case 'reno':case 'sell':return s.phase==='play'&&tp&&tp.uid===from&&!!s.pending&&s.pending.type===name;
+  case 'borrow':return s.phase==='play'&&tp&&tp.uid===from&&(!s.pending||s.pending.type==='sell')&&!s.trade&&!s.auction;
+  case 'repay':return s.phase==='play'&&tp&&tp.uid===from&&!s.pending&&!s.trade&&!s.auction;
  }return false;}
 function apply(name,args,from){if(!A[name]||!allowed(S,from,name,args))return false;
  if(name==='join')args=[String(args[0]).trim().slice(0,14),from];
  if(name==='claim')args=[args[0],from];
  if(name==='job'&&args[0]!=null&&!(S.pending.options||[]).includes(args[0]))return false;
  if(name==='reno'&&args[0]!=null&&!(S.pending.options||[]).includes(args[0]))return false;
+ if(name==='sell'&&!(S.pending.options||[]).includes(args[0]))return false;
  const s=structuredClone(S);A[name](s,...args);s.rev=(s.rev||0)+1;
  s.deadline=(s.phase==='play'&&s.rules.timer)?Date.now()+(s.rules.timer+6)*1000:null;
  S=s;saveHost();broadcast();onState();return true;}
@@ -867,6 +875,7 @@ function effects(prev,next){
   if(!a){stampTile(Number(k));primary=prev.auction?'sold':(primary||'stamp');}
   else if(a.owner!==b.owner){primary='swap';sparkleTile(Number(k));}
   else if((b.level||0)>(a.level||0)){primary=primary||'build';sparkleTile(Number(k));floatText(tileEls[Number(k)],b.level===3?'HOTEL':'HOUSE','up');}}
+ for(const k in prev.owned)if(!next.owned[k]){primary='banksale';floatText(tileEls[Number(k)],'SOLD','down');}
  if(next.rules&&next.rules.jackpot&&(next.pot||0)<(prev.pot||0))primary='jackpot';
  if(prev.pending&&prev.pending.type==='target'&&!(next.pending&&next.pending.type==='target'))primary='sneaky';
  const rows=document.querySelectorAll('#score .srow');
@@ -893,6 +902,7 @@ function effects(prev,next){
   case 'sneaky':play('sneaky');break;
   case 'jackpot':{play('jackpot');const [gx,gy]=centerOf(tileEls[19]);burst(gx,gy,70,{coins:true,power:12});setTimeout(()=>burst(gx,gy,50,{coins:true,power:10}),300);floatText(tileEls[19],'JACKPOT!','gold');buzz([40,40,40,40,120]);break;}
   case 'swap':play('swap');break;
+  case 'banksale':play('womp');setTimeout(()=>play('gavel'),300);buzz([40,60,40]);break;
   case 'reno':play('stamp');setTimeout(()=>play('sparkle'),220);break;
   case 'wedding':play('bells');burst(x,y,110,{power:12});setTimeout(()=>burst(x,y,60,{power:9}),400);break;
   case 'baby':play('rattle');burst(x,y,70,{power:10});break;
@@ -958,7 +968,7 @@ function tickTimer(){const el=$('tmr');const left=timerLeft();
  if(mode==='host'&&S.phase==='play'&&S.rules.timer&&S.deadline&&Date.now()>S.deadline&&!busy)autoAct();}
 function autoAct(){const s=S,i=actorIdx(s),p=s.players[i];if(!p)return;const pd=s.pending;let a=null;
  if(s.auction)a=['fold'];else if(s.trade)a=['tradeAnswer',false];
- else if(pd)a={path:['path','work'],job:['job',pd.options&&pd.options[0]],buy:['buy',false],study:['study',false],reno:['reno',null],target:['target',pd.options&&pd.options[0]]}[pd.type];
+ else if(pd)a={path:['path','work'],job:['job',pd.options&&pd.options[0]],buy:['buy',false],study:['study',false],reno:['reno',null],sell:['sell',pd.options&&pd.options.slice().sort((a,b)=>sellValue(s,a)-sellValue(s,b))[0]],target:['target',pd.options&&pd.options[0]]}[pd.type];
  else a=['spin',1+rnd(10)];
  if(!a)return;apply('timeout',[i],ME);apply(a[0],a.slice(1),p.uid);}
 setInterval(tickTimer,250);
@@ -1105,7 +1115,7 @@ function dockHTML(s){const p=s.players[s.turn],pd=s.pending,who=esc(p.name),mine
   if(isMine(a))return `<h2 class="h">Offer sent to ${esc(b.name)}</h2>${offer}<button class="btn c" data-t="cancel">Withdraw offer</button>`;
   return `<div class="waiting">${pawnHTML(PCOL[a.color],'')}<div><div class="h sm">${esc(a.name)} offered ${esc(b.name)} a trade</div></div></div>${offer}`;}
  if(!mine){if(busy)return `<div class="h sm">Sending…</div>`;
-  const what=!pd?'Waiting for them to spin':pd.type==='buy'?`Deciding on ${esc(T[pd.tile].full)}`:({path:'Choosing uni or work',job:'Picking a job',study:'Deciding on uni',reno:'Choosing where to build',target:'Picking a target…'}[pd.type]||'Deciding');
+  const what=!pd?'Waiting for them to spin':pd.type==='buy'?`Deciding on ${esc(T[pd.tile].full)}`:({path:'Choosing uni or work',job:'Picking a job',study:'Deciding on uni',reno:'Choosing where to build',sell:'Selling a suburb to cover debts',target:'Picking a target…'}[pd.type]||'Deciding');
   return `<div class="waiting">${pawnHTML(PCOL[p.color],'')}<div><div class="h sm">${who}’s turn</div><div class="sub">${what}</div></div>${tmrHTML()}</div>`;}
  const head=`<div class="dockhead"><span class="h">${!multi()?'Your turn, '+who:who+'’s turn'}</span><span class="sub">${p.career?esc(p.career)+' · '+fmt(p.salary)+' a lap':'No job yet'}</span>${tmrHTML()}</div>`;
  if(!pd&&buildOpen){const ks=buildable(s,s.turn);
@@ -1115,7 +1125,7 @@ function dockHTML(s){const p=s.players[s.turn],pd=s.pending,who=esc(p.name),mine
  if(!pd){const canBuild=buildable(s,s.turn).length>0;const loan=s.rules.loan;
   return head+`<button class="big" id="spinBtn">Spin</button>
   <div class="row3"><button class="btn c" data-t="open"${s.players.length<2?' disabled':''}>${svg('swap',17,2.6)}Trade</button><button class="btn c" data-t="build"${canBuild?'':' disabled'}>${svg('hammer',17,2.6)}Build</button>${owes(p)?`<button class="btn c" data-a="repay"${p.cash<owes(p)?' disabled':''}>${svg('house',17,2.6)}Repay</button>`:`<button class="btn c" data-a="borrow">${svg('house',17,2.6)}Mum&amp;Dad</button>`}</div>
-  <p class="hint">${owes(p)?`You owe Mum and Dad ${fmt(owes(p))}. Paying it back earns 3 joy.`:`Mum and Dad will lend you ${fmt(loan)}, but you lose 2 joy each Payday until it’s paid back.`}${canBuild?' You own a full set, so you can build houses.':''}</p>`;}
+  <p class="hint">${owes(p)?`You owe Mum and Dad ${fmt(owes(p))}. Paying it back after a Payday earns 2 joy.`:`Mum and Dad will lend you ${fmt(loan)}, but you lose 2 joy each Payday until it’s paid back.`}${canBuild?' You own a full set, so you can build houses.':''}</p>`;}
  if(pd.type==='path')return `<h2 class="h">${who}, pick your path</h2><div class="stack">
   <button class="btn pick" data-a="path" data-v="uni">Go to uni<small>Pay $40k now, choose from jobs paying $38k–$68k</small></button>
   <button class="btn" data-a="path" data-v="work">Start working<small>Get a $40k head start, choose from jobs paying $18k–$34k</small></button></div>`;
@@ -1131,6 +1141,9 @@ function dockHTML(s){const p=s.players[s.turn],pd=s.pending,who=esc(p.name),mine
    return `<button class="btn" data-target="${j}"><span style="display:flex;align-items:center;gap:8px">${pawnHTML(PCOL[q.color],'mini')}${esc(q.name)}</span><small>${swap?`${esc(q.career)} · ${fmt(q.salary)} a lap`:`Has ${fmt(q.cash)}`}</small></button>`}).join('')}</div>`;}
  if(pd.type==='study')return `<h2 class="h">Go back to uni?</h2><p class="hint">Pay $40k for a degree, then pick from two degree jobs.</p>
   <div class="row2"><button class="big" data-a="study" data-v="1" style="font-size:19px">Study −$40k</button><button class="btn c" data-a="study" data-v="">Skip</button></div>`;
+ if(pd.type==='sell'){const canLoan=!owes(p);return `<h2 class="h">You're ${fmt(-p.cash)} in the red</h2><p class="hint">Sell a suburb back to the bank for half what it's worth (including houses) until you're back above $0.${canLoan?' Or ask Mum and Dad for a loan.':''}</p><div class="stack">
+  ${pd.options.map(k=>{const o=s.owned[k];return `<button class="btn" data-a="sell" data-v="${k}">Sell ${esc(T[k].full)}${lvlTag(o.level||0)}<small>Bank pays ${fmt(sellValue(s,k))} · ${p.cash+sellValue(s,k)>=0?'clears your debt':'still in the red after'}</small></button>`}).join('')}
+  ${canLoan?`<button class="btn c" data-a="borrow">Borrow ${fmt(s.rules.loan)} from Mum and Dad</button>`:''}</div>`;}
  if(pd.type==='reno')return `<h2 class="h">Free building permit</h2><p class="hint">Add a house to any suburb you own, no full set needed. It costs half the suburb's price.</p><div class="stack">
   ${pd.options.map(k=>{const nl=(s.owned[k].level||0)+1;return `<button class="btn" data-a="reno" data-v="${k}">${esc(T[k].full)} → ${nl===3?'hotel':nl+(nl>1?' houses':' house')}<small>Costs ${fmt(buildCost(k))} · rent becomes ${fmt(T[k].r*LVL[nl])}</small></button>`}).join('')}
   <button class="btn c" data-a="reno" data-v="">Skip</button></div>`;
@@ -1214,7 +1227,7 @@ document.addEventListener('click',e=>{
   if(a==='reset'){act('reset');return;}
   if(!canAct())return;
   if(a==='path')act('path',v);else if(a==='job')act('job',v||null);else if(a==='buy')act('buy',!!v);
-  else if(a==='study')act('study',!!v);else if(a==='reno')act('reno',v===''?null:Number(v));else if(a==='borrow'||a==='repay')act(a);return;}
+  else if(a==='study')act('study',!!v);else if(a==='reno')act('reno',v===''?null:Number(v));else if(a==='sell')act('sell',Number(v));else if(a==='borrow'||a==='repay')act(a);return;}
  if(e.target.closest('#spinBtn')){if(canAct()&&!S.pending&&!S.trade)act('spin',1+rnd(10));return;}
  const t=e.target.closest('[data-tile]');if(t){const i=Number(t.dataset.tile);info=info===i?null:i;render();return;}
  const l=e.target.closest('[data-leave]');if(l){act('leave',Number(l.dataset.leave));return;}

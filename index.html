@@ -338,6 +338,17 @@ td.owed{color:var(--bad)}
 .sign{animation:signin .9s cubic-bezier(.3,1.5,.5,1) both}
 @keyframes signin{from{transform:rotate(-14deg) scale(.6);opacity:0}to{transform:rotate(-3deg)}}
 @media (prefers-reduced-motion: reduce){#spinBtn,.turnflash div,.ftxt,.stamp b,.house.drop,.blk.rise,.seat.new,.pawns .pawn,.sign,.pod .pawn,.hub.pop{animation-duration:.01s!important;animation-delay:0s!important}.lflip{transition-duration:.01s}}
+/* 3D board mode */
+.boardframe.b3{background:none;border:0;box-shadow:none;padding:0}
+.b3 .board{background:none;display:block;position:relative;aspect-ratio:358/468;overflow:visible;padding:0;border-radius:0}
+.b3 canvas.c3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+.b3 .tile{position:absolute;background:none!important;box-shadow:none!important;outline:none!important;z-index:1;border-radius:8px;overflow:visible}
+.b3 .tile>*:not(.stamp){display:none!important}
+.b3 .tile.land{animation:none}
+.b3 .center{display:none}
+.hud3d{gap:8px}
+#wheelGhost{position:absolute;pointer-events:none;z-index:1}
+.viewtog{align-self:center;background:none;border:0;color:#C9D2FF;font-weight:800;font-size:13px;text-decoration:underline;text-underline-offset:3px;margin-top:-6px;padding:4px 8px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -404,7 +415,9 @@ td.owed{color:var(--bad)}
   </section>
 
   <section id="game" class="stack" style="gap:16px" hidden>
+    <div class="stack hud3d" id="hud3d" hidden></div>
     <div class="boardframe"><div class="board" id="board"></div></div>
+    <button class="viewtog" id="viewTog" hidden>Switch to the flat board</button>
     <div class="card" id="dock"><div class="stack" id="dockMain"></div><div class="reacts" id="reacts" role="group" aria-label="Send a reaction"></div></div>
     <div class="card" id="tradeBox" hidden></div>
     <h2 class="sectitle">Players</h2>
@@ -442,6 +455,7 @@ td.owed{color:var(--bad)}
 <canvas id="fxcanvas" aria-hidden="true"></canvas>
 
 <script src="peerjs.min.js"></script>
+<script type="importmap">{"imports":{"three":"./3d/three.module.min.js"}}</script>
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -847,14 +861,15 @@ async function processState(next){const prev=V;const sq=next.spinSeq||0;
   const pi=prev.turn,pp=prev.players[pi],np=next.players[pi];
   if(pp&&np){const path=[];let pos=pp.pos;
    for(let k=0;k<next.lastSpin;k++){pos=(pos+1)%28;path.push(pos);if(pos===np.pos&&(k===next.lastSpin-1||np.retired))break;}
-   hideMover=pi;render();await hopPath(pp.pos,path,PCOL[pp.color]);}
+   hideMover=pi;render();await hopPath(pp.pos,path,PCOL[pp.color],pi);}
   spinning=false;hideMover=null;spinShown=null;
  }else seenSpin=sq;
  V=next;render();effects(prev,next);checkCard();}
 function checkCard(){const seq=V.card?V.card.seq:0;if(seq>seenCard)showCard(V.card);seenCard=seq;}
 const segAngle=n=>(n-1)*36+18;
-function setWheel(n){const w=$('wheel');if(!w)return;wheelDeg=n?-segAngle(n):0;w.style.transform=`rotate(${wheelDeg}deg)`;}
-function spinWheel(n){return new Promise(res=>{const w=$('wheel'),hub=$('hub');if(!w||!tileEls.length||$('game').hidden){wheelDeg=-segAngle(n);res();return;}
+function setWheel(n){if(B3)B3.setWheel(n);const w=$('wheel');if(!w)return;wheelDeg=n?-segAngle(n):0;w.style.transform=`rotate(${wheelDeg}deg)`;}
+function spinWheel(n){if(B3&&!$('game').hidden){play('whoosh');buzz(10);return B3.spin(n).then(()=>{setWheel(n);spinShown=n;play('ding');buzz(25);const wg=$('wheelGhost');if(wg)floatText(wg,String(n),'gold');return new Promise(r=>setTimeout(r,520));});}
+ return new Promise(res=>{const w=$('wheel'),hub=$('hub');if(!w||!tileEls.length||$('game').hidden){wheelDeg=-segAngle(n);res();return;}
  const target=-segAngle(n);const delta=((target-wheelDeg)%360+360)%360;const from=wheelDeg,to=wheelDeg+delta+360*5;
  const dur=reduceMotion()?30:2700;const t0=performance.now();let lastSeg=Math.floor(from/36);const ptr=document.querySelector('.ptr');
  play('whoosh');buzz(10);
@@ -864,7 +879,10 @@ function spinWheel(n){return new Promise(res=>{const w=$('wheel'),hub=$('hub');i
   else{wheelDeg=to;spinShown=n;hub.textContent=n;hub.classList.remove('pop');void hub.offsetWidth;hub.classList.add('pop');play('ding');buzz(25);setTimeout(res,520);}};
  requestAnimationFrame(step);});}
 function tileXY(i,frame){const fr=frame.getBoundingClientRect(),r=tileEls[i].getBoundingClientRect();return [r.left-fr.left+r.width/2,r.top-fr.top+r.height*.62];}
-async function hopPath(start,path,color){if(!path.length||reduceMotion()||$('game').hidden)return;
+async function hopPath(start,path,color,pi){if(!path.length||reduceMotion()||$('game').hidden)return;
+ if(B3&&pi!=null){const last=path[path.length-1];
+  await B3.hop(pi,start,path,(k,i)=>{play('hop',k);if(i===0&&k<path.length-1){play('payday');B3.coins(0,14);floatText(tileEls[0],'PAYDAY','gold');}});
+  play('land');buzz(15);if(last===0){play('payday');B3.coins(0,16);}return;}
  const frame=document.querySelector('.boardframe');const m=document.createElement('div');m.className='mover';m.innerHTML=pawnHTML(color,'');frame.appendChild(m);
  const w=m.offsetWidth,h=m.offsetHeight;const T2=(x,y,s='')=>`translate(${x-w/2}px,${y-h}px)${s}`;
  let [x0,y0]=tileXY(start,frame);m.style.transform=T2(x0,y0);
@@ -914,6 +932,9 @@ function effects(prev,next){
  const cardNew=(next.card?next.card.seq:0)>(prev.card?prev.card.seq:0);
  if(!primary&&!cardNew&&ap&&np){const dc=np.cash-ap.cash;if(dc>0)primary='gain';else if(dc<0)primary='loss';}
  const te=np?tileEls[np.pos]:null;const [x,y]=te?centerOf(te):[innerWidth/2,innerHeight/3];
+ if(B3&&np&&ap){const o=next.owned[np.pos];
+  if(T[np.pos].k==='prop'&&o&&o.owner!==actor&&np.cash<ap.cash&&prev.players[o.owner]){const gain=next.players[o.owner].cash-prev.players[o.owner].cash;if(gain>0)B3.coins(np.pos,Math.min(18,6+Math.round(gain/6)),o.owner);}
+  else if(primary==='gain')B3.coins(np.pos,10);}
  switch(primary){
   case 'stamp':play('stamp');buzz(30);setTimeout(()=>play('kaching'),260);break;
   case 'auction':play('gavel');buzz([20,60,20]);break;
@@ -1045,6 +1066,34 @@ function buildBoard(){
  $('heroPawns').innerHTML=[[0,1.1],[1,.95],[2,1.02],[3,.9],[4,.98]].map(([c,s])=>`<span class="pawn" style="--c:${PCOL[c]};--s:${s}"><span class="hd"></span><span class="bd"></span><span class="bs"></span></span>`).join('');
 }
 
+/* ---------- optional 3D board (falls back to the flat board) ---------- */
+let B3=null,b3Loading=false;
+const KCOL={payday:'#2BB673',hustle:'#2BB673',promo:'#2BB673',life:'#FFC53D',tax:'#D63A3A',holiday:'#D63A3A',uni:'#2F6FE0',jobfair:'#2F6FE0',baby:'#FF7EB6',wedding:'#FF7EB6',gap:'#A98BFF',reno:'#E3E8F4'};
+const WHITE3={tax:1,holiday:1,uni:1,jobfair:1};
+const want3d=()=>{try{return localStorage.getItem('hs-3d')!=='off';}catch(e){return true;}};
+const hasGL=(()=>{try{return !!(window.WebGL2RenderingContext&&document.createElement('canvas').getContext('webgl2'));}catch(e){return false;}})();
+function paintViewTog(){const b=$('viewTog');b.hidden=!hasGL;b.textContent=B3?'Switch to the flat board':b3Loading?'Loading 3D board…':'Switch to the 3D board';}
+async function enable3d(){if(B3||b3Loading||!hasGL)return;b3Loading=true;paintViewTog();
+ try{await Promise.race([Promise.all(['120px "Lilita One"','800 40px "Barlow Condensed"','800 40px Nunito'].map(f=>document.fonts.load(f))),new Promise(r=>setTimeout(r,2500))]);
+  const mod=await import('./3d/board3d.js');
+  const cv=document.createElement('canvas');cv.className='c3d';
+  document.querySelector('.boardframe').classList.add('b3');$('board').prepend(cv);
+  const hud=$('hud3d');hud.hidden=false;hud.append($('score'),$('pot'),$('ticker'));
+  const wg=document.createElement('div');wg.id='wheelGhost';$('board').append(wg);
+  B3=await mod.create({canvas:cv,T,KIND,KCOL,WHITE:WHITE3,GCOL,IC,pos2cell,CORNERS,onTick:()=>play('tick'),reduce:reduceMotion});
+  B3.setWheel(V.lastSpin);B3.onLayout(layoutGhosts);
+ }catch(e){console.warn('3D board unavailable',e);b3Loading=false;disable3d();}
+ b3Loading=false;paintViewTog();render();}
+function disable3d(){if(B3){try{B3.dispose();}catch(e){}B3=null;}
+ document.querySelector('.boardframe').classList.remove('b3');const cv=document.querySelector('canvas.c3d');if(cv)cv.remove();const wg=$('wheelGhost');if(wg)wg.remove();
+ const c=document.querySelector('#board .center');if(c){c.querySelector('.minisign').after($('score'));$('score').after($('pot'));c.append($('ticker'));}
+ $('hud3d').hidden=true;tileEls.forEach(el=>{el.style.left=el.style.top=el.style.width=el.style.height='';});paintViewTog();render();}
+function layoutGhosts(){if(!B3)return;tileEls.forEach((el,i)=>{const r=B3.tileRect(i);el.style.left=r.x+'px';el.style.top=r.y+'px';el.style.width=r.w+'px';el.style.height=r.h+'px';});
+ const w=$('wheelGhost');if(w){const r=B3.wheelRect();w.style.left=r.x+'px';w.style.top=r.y+'px';w.style.width=r.w+'px';w.style.height=r.h+'px';}}
+function sync3d(s){if(!B3||s.phase!=='play')return;const curP=s.players[s.turn];const owned={};
+ for(const k in s.owned){const o=s.owned[k];const op=s.players[o.owner];if(op)owned[k]={owner:o.owner,level:o.level||0,color:PCOL[op.color]};}
+ B3.sync(s.players.map(p=>({color:PCOL[p.color],pos:p.pos,retired:p.retired})),owned,!spinning&&curP&&!curP.retired?{tile:curP.pos,color:PCOL[curP.color]}:null);}
+
 /* ---------- render ---------- */
 function pname(p){return esc(p.name)+(isMine(p)&&!multi()?'<span class="you">YOU</span>':'');}
 function render(){const s=V,home=mode==='home';
@@ -1098,6 +1147,7 @@ function renderGame(s){
   const here=s.players.map((p,j)=>({p,j})).filter(x=>x.p.pos===t.i&&!x.p.retired&&x.j!==hideMover).sort((a,b)=>(a.j===s.turn)-(b.j===s.turn)).reverse();
   el.querySelector('.toks').innerHTML=here.map(x=>pawnHTML(PCOL[x.p.color],'')).join('');
   el.classList.toggle('here',!spinning&&!!curP&&!curP.retired&&curP.pos===t.i);});
+ sync3d(s);
  $('score').classList.toggle('five',s.players.length>=5);
  $('score').innerHTML=s.players.map((p,i)=>`<div class="srow${i===s.turn?' now':''}${p.retired?' out':''}">${pawnHTML(PCOL[p.color],'')}<div class="who"><span class="n">${esc(p.name)}${isMine(p)&&!multi()?' (you)':''}</span><span class="j">${p.retired?'Retired':p.career?esc(p.career):'No job yet'}${p.skip?' · gap year':''}${onlineIds().includes(p.uid)?'':' · away'}</span></div><span class="c${p.cash<0?' neg':''}">${fmt(p.cash)}</span></div>`).join('');
  $('hub').textContent=spinning?(spinShown??'?'):(s.lastSpin??'–');
@@ -1295,7 +1345,7 @@ $('inviteBtn').onclick=async()=>{const url=location.origin+location.pathname+'#'
  try{await navigator.clipboard.writeText(url);$('inviteBtn').textContent='Link copied';setTimeout(()=>$('inviteBtn').textContent='Invite',2000);}catch(e){banner('Invite link: '+url);}};
 
 /* ---------- boot ---------- */
-buildBoard();fxInit();paintSound();
+buildBoard();fxInit();paintSound();paintViewTog();$('viewTog').onclick=()=>{if(B3){try{localStorage.setItem('hs-3d','off');}catch(e){}disable3d();}else{try{localStorage.removeItem('hs-3d');}catch(e){}enable3d();}};if(want3d())enable3d();
 $('soundBtn').onclick=()=>{SND.on=!SND.on;try{localStorage.setItem('hs-sound',SND.on?'on':'off');}catch(e){}paintSound();if(SND.on){audio();play('chime');}};
 document.addEventListener('pointerdown',e=>{if(SND.on)audio();if(e.target.closest('.btn,.big,.invite,.reacts button'))play('click');},{passive:true});
 (function boot(){

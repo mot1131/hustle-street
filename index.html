@@ -366,6 +366,7 @@ td.owed{color:var(--bad)}
       <label class="h" for="codeIn">Join with a code</label>
       <div class="joinrow"><input class="codein" id="codeIn" maxlength="4" placeholder="KX7P" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="big mint" id="joinCodeBtn">Join</button></div>
     </div>
+    <div class="card" id="hof" hidden></div>
     <div class="boxlid"><div><b>2–5</b><span>players</span></div><div><b>20–50</b><span>minutes</span></div><div><b>10+</b><span>ages</span></div></div>
   </section>
 
@@ -425,7 +426,7 @@ td.owed{color:var(--bad)}
       <li><b>Trading</b>: on your turn, before you spin, offer suburbs and cash to another player.</li>
       <li><b>Bank of Mum and Dad</b>: borrow money on your turn (the amount is a house rule). You can only have one loan at a time. Each Payday until you pay it back, Mum nags you and you lose joy: 1 for a $30k loan, 2 for $50k, 3 for $80k. Anything owed comes off your final score.</li>
       <li><b>Joy</b> comes from weddings, babies, holidays, gap years and good Life cards. Each point is worth $10k at the end. You also get $35k per kid and $40k for being married.</li>
-      <li><b>Life cards</b> include a few sneaky ones: Career Swap and Robin Hood let you pick a target.</li>
+      <li><b>Life cards</b> include a few sneaky ones: Career Swap and Robin Hood let you pick a target. There are 37 of them, from Fringe tickets to pokies. The Hall of fame on the home screen keeps score of your finished games on this device.</li>
       <li><b>Lost your phone?</b> Open the invite link on any device and tap your name to rejoin.</li>
       <li>After your last lap you retire (first retiree gets $30k, second $15k, third $5k). Retired players still collect rent. When everyone has retired, the highest net worth wins.</li>
     </ul>
@@ -559,6 +560,26 @@ const CARDS=[
  (s,i,p)=>{p.freeRent=true;return C('Mates rates','Your next rent payment is on the house.','FREE RENT','joy','house')},
  (s,i,p)=>{let r=-Infinity,j=-1;s.players.forEach((q,k)=>{if(k!==i&&q.cash>r){r=q.cash;j=k;}});if(j<0)return C('A mate shouts','Nobody around to shout you.','NO EFFECT','joy','gift');
   s.players[j].cash-=15;p.cash+=15;return C('Your rich mate shouts',`${s.players[j].name} covers your big night out.`,'+$15K','money','gift')},
+ (s,i,p)=>{spend(s,p,3);p.happy+=4;return C('Adelaide Fringe','Three shows, a spiegeltent and a $9 pizza.','+4 JOY · −$3K','joy','medal')},
+ (s,i,p)=>{spend(s,p,6);p.happy+=5;return C('Adelaide 500 tickets','Loud, fast and sunburnt. Worth it.','+5 JOY · −$6K','joy','tyre')},
+ (s,i,p)=>{const w=Math.random()<.5;if(w)p.happy+=4;else p.happy-=1;return w?C('Showdown win','Crows v Power and your side got up. Pub is going off.','+4 JOY','joy','trophy'):C('Showdown loss','Silent drive home along Port Road.','−1 JOY','cost','trophy')},
+ (s,i,p)=>{spend(s,p,4);p.happy+=3;return C('Central Market haul','Cheese, olives and a fresh coffee. Rent be damned.','+3 JOY · −$4K','joy','pack')},
+ (s,i,p)=>{spend(s,p,7);return C('Heatwave','Five days over 40. The aircon bill arrives.','−$7K','cost','up')},
+ (s,i,p)=>{spend(s,p,10);p.happy+=6;return C('Barossa weekend','Cellar doors, a long lunch and a designated driver.','+6 JOY · −$10K','joy','plane')},
+ (s,i,p)=>{p.cash+=8;return C('Garage sale','Sold the exercise bike nobody used.','+$8K','money','coin')},
+ (s,i,p)=>{p.cash+=5;return C('Fifty bucks in a jacket','From winter 2019. Sweet.','+$5K','money','coin')},
+ (s,i,p)=>{spend(s,p,3);return C('Tram without a ticket','The inspector got on at Moseley Square.','−$3K','cost','camera')},
+ (s,i,p)=>{p.happy+=3;return C('Fixed the neighbour’s fence','Got a slab of beer and a good chat out of it.','+3 JOY','joy','hammer')},
+ (s,i,p)=>{spend(s,p,6);return C('Power bill shock','Turns out the old heater was not efficient.','−$6K','cost','bolt')},
+ (s,i,p)=>{s.players.forEach(q=>{q.happy+=2});return C('Street party','Council shut the road. Everyone gets a sausage.','EVERYONE +2 JOY','joy','heart')},
+ (s,i,p)=>{const o=ownedBy(s,i).length;const a=o?14:4;p.cash+=a;return C('Solar rebate',o?'Landlords with panels get paid properly.':'A small rebate for the renter’s plug-in panel.','+$'+a+'K','money','bolt')},
+ (s,i,p)=>{spend(s,p,4);return C('Pothole on Anzac Highway','Blew a tyre and the rim.','−$4K','cost','tyre')},
+ (s,i,p)=>{const w=Math.random()<.5;if(w)p.cash+=18;else spend(s,p,12);return w?C('Pokies payout','You put in a twenty. The machine went off.','+$18K','money','coin'):C('Pokies emptied you','The machine ate your whole pay packet.','−$12K','cost','coin')},
+ (s,i,p)=>{const ws=s.players.map((q,j)=>({j,w:worth(s,j).total}));const lo=ws.reduce((a,b)=>b.w<a.w?b:a);
+  if(lo.j===i){p.cash+=8;return C('Sunday roast at Mum’s','She noticed you looked thin. Leftovers and a $8k “loan” you won’t repay.','+$8K','money','heart')}
+  p.happy+=1;return C('Sunday roast at Mum’s','Roast lamb and a lecture. Nice, though.','+1 JOY','joy','heart')},
+ (s,i,p)=>{let r=-Infinity,j=-1;s.players.forEach((q,k)=>{if(q.cash>r){r=q.cash;j=k;}});const q=s.players[j];spend(s,q,8);
+  return C('Council parking blitz',`${q.name} has the most cash, and the biggest ute. $8k fine.`,`${q.name.toUpperCase()} −$8K`,j===i?'cost':'money','camera')},
 ];
 
 /* ---------- game rules ---------- */
@@ -635,7 +656,7 @@ const A={
  leave:(s,i)=>{s.players.splice(i,1)},
  laps:(s,v)=>{s.laps=v},
  rules:(s,k,v)=>{s.rules[k]=v},
- start:(s)=>{s.phase='play';s.turn=0;s.players.forEach(p=>{p.cash=s.rules.cash;});s.stats=s.players.map(newStats);s.pot=0;s.bestTrade=null;s.pending={type:'path'};s.log=[];
+ start:(s)=>{s.gid=Date.now().toString(36)+rnd(1e6).toString(36);s.phase='play';s.turn=0;s.players.forEach(p=>{p.cash=s.rules.cash;});s.stats=s.players.map(newStats);s.pot=0;s.bestTrade=null;s.pending={type:'path'};s.log=[];
   log(s,null,`Game on: ${s.players.length} players, ${s.laps} laps, $${s.rules.cash}k each`);},
  spin:doSpin,
  path:(s,ch)=>{const p=s.players[s.turn];if(ch==='uni'){p.cash-=40;p.degree=true;log(s,s.turn,`${p.name} heads to uni. −$40k`);s.pending={type:'job',options:pick2(JOBS.filter(j=>j.d)),after:'spin'};}
@@ -1033,7 +1054,7 @@ function render(){const s=V,home=mode==='home';
  $('resetBtn').textContent=resetArm?'Tap again to wipe this game':'New game';
  $('resetBtn').hidden=home||s.phase==='lobby';$('leaveRoom').hidden=home;
  $('home').hidden=!home;
- if(home){$('lobby').hidden=$('game').hidden=$('over').hidden=true;const sv=loadHost();$('resumeBtn').hidden=!sv;
+ if(home){renderHof();$('lobby').hidden=$('game').hidden=$('over').hidden=true;const sv=loadHost();$('resumeBtn').hidden=!sv;
   if(sv)$('resumeBtn').innerHTML=`Resume room ${esc(sv.code)}<small>${sv.s.phase==='play'?'Game in progress':sv.s.phase==='over'?'Game finished':'Lobby'} · ${sv.s.players.map(p=>esc(p.name)).join(', ')||'no players yet'}</small>`;return;}
  $('lobby').hidden=s.phase!=='lobby';$('game').hidden=s.phase!=='play';$('over').hidden=s.phase!=='over';
  renderRejoin(s);
@@ -1163,6 +1184,28 @@ function awards(s){const out=[],P=s.players,st=i=>stat(s,i);
 function awardsHTML(s){const list=awards(s);if(!list.length)return '';
  return `<h2 class="sectitle">Awards</h2><div class="awards">${list.map(([ic,t,who,d],k)=>{const p=who!=null?s.players[who]:null;
   return `<div class="award" style="--c:${p?PCOL[p.color]:'#FFC53D'};animation-delay:${1.2+k*.12}s"><div class="aw-ic">${svg(ic,22,2.4)}</div><div class="aw-t">${esc(t)}</div>${p?`<div class="aw-who">${esc(p.name)}</div>`:''}<div class="aw-d">${esc(d)}</div></div>`}).join('')}</div>`;}
+/* ---------- results history (kept on this device) ---------- */
+const HKEY='hs-history';
+const loadHist=()=>{try{const h=JSON.parse(localStorage.getItem(HKEY)||'[]');return Array.isArray(h)?h:[];}catch(e){return [];}};
+const saveHist=h=>{try{localStorage.setItem(HKEY,JSON.stringify(h.slice(-300)));}catch(e){}};
+function recordGame(s,rows){if(!s.gid)return;const h=loadHist();if(h.some(x=>x.gid===s.gid))return;
+ h.push({gid:s.gid,t:Date.now(),laps:s.laps,rows:rows.map(r=>({n:String(r.p.name),v:Math.round(r.w.total)}))});saveHist(h);}
+function tally(names){const m={},low=names&&names.map(n=>n.trim().toLowerCase());
+ for(const g of loadHist()){if(!g||!Array.isArray(g.rows))continue;
+  if(low&&!low.every(n=>g.rows.some(r=>String(r.n).trim().toLowerCase()===n)))continue;
+  g.rows.forEach((r,k)=>{const key=String(r.n).trim().toLowerCase();const e=m[key]=m[key]||{n:String(r.n),w:0,g:0,best:-Infinity};e.g++;if(k===0)e.w++;if(r.v>e.best)e.best=r.v;e.n=String(r.n);});}
+ return Object.values(m).sort((a,b)=>b.w-a.w||b.g-a.g||b.best-a.best);}
+const tallyTable=t=>`<div class="tbl"><table><thead><tr><th>Player</th><th>Wins</th><th>Games</th><th>Best</th></tr></thead><tbody>${t.slice(0,8).map((e,k)=>`<tr><td><b>${k===0&&e.w>0?'★ ':''}${esc(e.n)}</b></td><td>${e.w}</td><td>${e.g}</td><td>${fmt(e.best)}</td></tr>`).join('')}</tbody></table></div>`;
+let hofArm=false;
+function renderHof(){const el=$('hof'),t=tally();el.hidden=!t.length;if(!t.length)return;
+ el.innerHTML=`<h2 class="h">Hall of fame</h2>${tallyTable(t)}<p class="hint">Wins are the richest at the end. Saved on this device only.</p><button class="btn" id="hofClear">${hofArm?'Tap again to clear the scoreboard':'Clear scoreboard'}</button>`;
+ $('hofClear').onclick=()=>{if(!hofArm){hofArm=true;renderHof();setTimeout(()=>{if(hofArm){hofArm=false;renderHof();}},4000);return;}hofArm=false;try{localStorage.removeItem(HKEY);}catch(e){}renderHof();};}
+function h2hHTML(s,rows){recordGame(s,rows);const names=rows.map(r=>r.p.name);const t=tally(names);if(!t.length)return '';
+ const low=names.map(n=>n.trim().toLowerCase());const games=loadHist().filter(g=>g&&Array.isArray(g.rows)&&low.every(n=>g.rows.some(r=>String(r.n).trim().toLowerCase()===n)));
+ let streak=0,who=null;for(let k=games.length-1;k>=0;k--){const w=String(games[k].rows[0].n).trim().toLowerCase();if(who==null)who=w;if(w===who)streak++;else break;}
+ const last=games.length?games[games.length-1].rows[0].n:'';
+ const line=games.length>1?`${games.length} games together${streak>=2?` · ${esc(last)} is on a ${streak}-game streak`:''}`:'First game together. Play again to start a rivalry.';
+ return `<h2 class="sectitle">Head to head</h2>${tallyTable(t)}<p class="hint" style="color:#C9D2FF;text-align:center">${line}</p>`;}
 function renderOver(s){const rows=s.players.map((p,i)=>({p,w:worth(s,i)})).sort((a,b)=>b.w.total-a.w.total);
  const top=rows.slice(0,3);const order=top.length===3?[top[1],top[0],top[2]]:top.length===2?[top[1],top[0]]:top;
  const hts={0:128,1:92,2:66};
@@ -1175,6 +1218,7 @@ function renderOver(s){const rows=s.players.map((p,i)=>({p,w:worth(s,i)})).sort(
   </tbody></table></div>
   <p class="hint" style="color:#C9D2FF;text-align:center;margin-top:-6px">Family bonus: $35k per kid, $40k for being married. Joy is worth $10k a point.</p>
   ${awardsHTML(s)}
+  ${h2hHTML(s,rows)}
   <button class="big" data-a="reset">Play again</button>`;
  if(firstPaint){document.querySelectorAll('#over .pod .pawn').forEach((e,k,all)=>{const place=Number(e.parentElement.querySelector('.blk').textContent)-1;e.style.animationDelay=((2-place)*.35+.6)+'s';});setTimeout(()=>{overAnimated=true;},50);}
  else document.querySelectorAll('#over .pod .pawn').forEach(e=>e.style.animation='none');}
